@@ -1,0 +1,230 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,17,8,0.45);
+  z-index: 200;
+  animation: fadeIn 0.2s ease;
+}
+
+.panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 100vw;
+  background: var(--white);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.28s var(--ease);
+  border-left: 1px solid var(--beige-mid);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.header {
+  padding: 26px 26px 18px;
+  border-bottom: 1px solid var(--beige-mid);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--brown-dark);
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  font-weight: 300;
+}
+
+.closeBtn {
+  background: var(--beige-light);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.closeBtn:hover { background: var(--beige-mid); color: var(--ink); }
+
+.items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 26px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 80px;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.emptyLine {
+  width: 36px;
+  height: 1px;
+  background: var(--beige-mid);
+  margin: 14px auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--beige-light);
+}
+.item:last-child { border-bottom: none; }
+
+.itemThumb {
+  width: 48px;
+  height: 48px;
+  background: var(--beige-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.itemIcon { width: 20px; height: 20px; color: var(--brown-light); }
+
+.info { flex: 1; min-width: 0; }
+
+.itemName {
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+}
+
+.itemUnit {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 300;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--beige-light);
+  border-radius: 100px;
+  padding: 3px;
+}
+
+.controls button {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.controls button:first-child {
+  background: var(--white);
+  color: var(--brown);
+  box-shadow: var(--shadow-sm);
+}
+
+.controls button:last-child {
+  background: var(--brown-dark);
+  color: var(--white);
+}
+
+.controls button:hover:first-child { background: var(--beige-light); }
+.controls button:hover:last-child  { background: var(--brown); }
+
+.qty {
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.subtotal {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--brown-dark);
+  min-width: 60px;
+  text-align: right;
+}
+
+.footer {
+  padding: 18px 26px 26px;
+  border-top: 1px solid var(--beige-mid);
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+
+.totalLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.totalValue {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--brown-dark);
+}
+
+.checkoutBtn {
+  width: 100%;
+  background: var(--brown-dark);
+  color: var(--cream);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+
+.checkoutBtn:hover:not(:disabled) { background: var(--brown); }
+
+.checkoutBtn:disabled {
+  background: var(--beige-mid);
+  color: var(--beige-dark);
+  cursor: not-allowed;
+}

@@ -1,0 +1,179 @@
+.page {
+  max-width: 520px;
+  margin: 50px auto;
+  padding: 0 20px 80px;
+  animation: fadeUp 0.4s var(--ease);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Logo no topo */
+.logoTop {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 36px;
+}
+
+.logoTopImg {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  opacity: 0.75;
+}
+
+/* Badge de confirmação */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--success);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkCircle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkIcon { width: 11px; height: 11px; color: white; }
+
+/* Título */
+.title {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--brown-dark);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  margin-bottom: 14px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+  margin-bottom: 36px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--beige-mid);
+  margin-bottom: 30px;
+}
+
+/* Valor */
+.valorSection { margin-bottom: 28px; }
+
+.valorLabel {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.valor {
+  font-family: var(--font-display);
+  font-size: 50px;
+  color: var(--brown-dark);
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+/* Pix */
+.pixSection { margin-bottom: 22px; }
+
+.pixLabel {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.pixKeyBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--white);
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
+.pixKey {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--brown-dark);
+  word-break: break-all;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brown-dark);
+  color: var(--cream);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: background 0.18s;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover { background: var(--brown); }
+.copyBtn.copied { background: var(--success); }
+.copyIcon { width: 13px; height: 13px; }
+
+/* Nota */
+.note {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+  font-weight: 300;
+  margin-bottom: 28px;
+  padding: 15px 18px;
+  background: var(--white);
+  border: 1px solid var(--beige-mid);
+  border-radius: var(--radius-md);
+}
+
+/* Botão novo pedido */
+.novoBtn {
+  background: none;
+  border: 1.5px solid var(--beige-mid);
+  color: var(--muted);
+  border-radius: var(--radius-lg);
+  padding: 13px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: 100%;
+  transition: all 0.18s;
+}
+
+.novoBtn:hover {
+  border-color: var(--brown);
+  color: var(--brown);
+}

@@ -1,0 +1,226 @@
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Card do pedido */
+.pedidoCard {
+  background: var(--white);
+  border: 1px solid var(--beige-mid);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Cabeçalho */
+.pedidoHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: var(--beige-light);
+  border-bottom: 1px solid var(--beige-mid);
+  flex-wrap: wrap;
+}
+
+.pedidoId {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--brown-dark);
+  min-width: 60px;
+}
+
+.pedidoMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.data {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.metodo {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brown-muted);
+  background: var(--beige-mid);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+/* Corpo */
+.pedidoBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  padding: 16px 20px;
+}
+
+@media (max-width: 640px) {
+  .pedidoBody { grid-template-columns: 1fr; gap: 14px; }
+}
+
+.clienteCol, .entregaCol, .itensCol {
+  padding-right: 20px;
+}
+
+.clienteCol { border-right: 1px solid var(--beige-mid); }
+.entregaCol { padding-left: 20px; border-right: 1px solid var(--beige-mid); }
+.itensCol   { padding-left: 20px; }
+
+.clienteName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.waLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #25d366;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.insta {
+  display: block;
+  font-size: 12px;
+  color: var(--brown-light);
+  font-weight: 400;
+}
+
+.entregaTipo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.entregaEnd {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.frete {
+  font-size: 12px;
+  color: var(--brown-light);
+  font-weight: 500;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 300;
+  padding: 3px 0;
+}
+
+.itemQty {
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.total {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--brown-dark);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--beige-mid);
+}
+
+/* Footer com ações de status */
+.pedidoFooter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--beige-light);
+  border-top: 1px solid var(--beige-mid);
+  flex-wrap: wrap;
+}
+
+.atualizarLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.statusBtns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statusBtn {
+  border: none;
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all 0.18s;
+}
+
+.avancarBtn {
+  background: var(--brown-dark);
+  color: var(--cream);
+}
+.avancarBtn:hover { background: var(--brown); }
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid var(--danger) !important;
+  color: var(--danger);
+}
+.cancelBtn:hover { background: rgba(140,48,48,0.08); }
+
+/* Sabores por item no pedido */
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.itemFlavors {
+  font-size: 11px;
+  color: var(--brown-muted);
+  font-weight: 300;
+  font-style: italic;
+}
+
+.itemPrice {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--brown);
+  white-space: nowrap;
+  flex-shrink: 0;
+}

@@ -1,0 +1,95 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.statCard {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  border: 1px solid var(--cream-dark);
+  transition: box-shadow 0.2s;
+}
+
+.statCard:hover { box-shadow: var(--shadow-md); }
+
+.statNum {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--brown-dark);
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.accentBar {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 14px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--brown-dark);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--cream-dark);
+  background: var(--white);
+}
+
+.table { width: 100%; border-collapse: collapse; }
+
+.table th {
+  padding: 13px 20px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--cream);
+  border-bottom: 1px solid var(--cream-dark);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--cream-dark);
+  vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: #fdfaf7; }
+
+.tdId    { color: var(--muted); font-size: 13px; font-weight: 300; }
+.tdTotal { font-weight: 600; color: var(--brown); }
+.tdMuted { color: var(--muted); font-size: 13px; font-weight: 300; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-family: var(--font-body);
+}
