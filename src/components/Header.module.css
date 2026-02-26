@@ -1,6 +1,6 @@
 .header {
-  background: var(--beige-light);
-  border-bottom: 1px solid var(--beige-mid);
+  background: var(--brown-dark);
+  border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -10,7 +10,7 @@
   max-width: 1040px;
   margin: 0 auto;
   padding: 0 28px;
-  height: 68px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -23,13 +23,14 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .logoImg {
-  height: 36px;
+  height: 44px;
   width: auto;
   object-fit: contain;
-  /* A logo tem fundo bege similar, fica natural */
+  /* logo transparente sobre marrom — funciona perfeitamente */
 }
 
 .nav {
@@ -38,87 +39,30 @@
   gap: 6px;
 }
 
-.navBtn {
-  background: transparent;
-  border: 1px solid var(--beige-mid);
-  color: var(--brown-muted);
-  padding: 7px 18px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  transition: all 0.2s var(--ease);
-}
-
-.navBtn:hover {
-  border-color: var(--brown-light);
-  color: var(--brown);
-  background: rgba(92,50,24,0.05);
-}
-
-.navBtn.active {
-  background: var(--brown-dark);
-  color: var(--cream);
-  border-color: var(--brown-dark);
-}
-
 .cartBtn {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--brown-dark);
-  border: none;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
   color: var(--cream);
   padding: 9px 18px 9px 14px;
   border-radius: 100px;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.05em;
-  transition: background 0.2s;
-}
-
-.cartBtn:hover { background: var(--brown); }
-
-@media (max-width: 480px) {
-  .inner { padding: 0 16px; height: 60px; }
-  .logoImg { height: 28px; }
-  .navBtn { padding: 6px 12px; font-size: 11px; }
-  .cartBtn { padding: 8px 14px 8px 12px; }
-}
-
-/* Admin logado */
-.logoutBtn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: transparent;
-  border: 1px solid var(--beige-mid);
-  color: var(--muted);
-  padding: 7px 14px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 500;
   transition: all 0.2s;
 }
-.logoutBtn:hover {
-  border-color: var(--danger);
-  color: var(--danger);
-  background: rgba(140,48,48,0.05);
+.cartBtn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.3);
 }
 
-.logoutName {
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Cadeado discreto para acesso admin */
+/* Cadeado admin discreto */
 .adminAccessBtn {
   background: transparent;
   border: none;
-  color: var(--beige-mid);
+  color: rgba(255,255,255,0.2);
   width: 32px;
   height: 32px;
   display: flex;
@@ -128,6 +72,55 @@
   transition: all 0.2s;
 }
 .adminAccessBtn:hover {
-  color: var(--muted);
-  background: var(--beige-light);
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.08);
+}
+
+/* Admin logado */
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.logoutBtn:hover {
+  border-color: rgba(255,100,100,0.5);
+  color: rgba(255,150,150,1);
+}
+
+.logoutName {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  padding: 7px 18px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.navBtn:hover {
+  border-color: rgba(255,255,255,0.4);
+  color: var(--cream);
+}
+
+@media (max-width: 480px) {
+  .inner   { padding: 0 16px; height: 64px; }
+  .logoImg { height: 38px; }
+  .cartBtn { padding: 8px 14px 8px 12px; font-size: 11px; }
 }

@@ -90,18 +90,26 @@ export default function Checkout({ onBack, onConcluir }) {
     return e
   }
 
-  const handleSubmit = () => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async () => {
     const e = validate()
     if (Object.keys(e).length > 0) { setErrors(e); return }
+    setSubmitting(true)
+    try {
+      const enderecoEntrega = entrega === 'entrega'
+        ? `${form.logradouro}, ${form.numero}${form.complemento ? ', ' + form.complemento : ''} — ${form.bairro}, ${form.cidade}-${form.uf}, CEP ${form.cep}`
+        : entrega === 'retirada_franca'
+          ? `Retirada — ${POLOS.franca.endereco}`
+          : `Retirada — ${POLOS.cassia.endereco}`
 
-    const enderecoEntrega = entrega === 'entrega'
-      ? `${form.logradouro}, ${form.numero}${form.complemento ? ', ' + form.complemento : ''} — ${form.bairro}, ${form.cidade}-${form.uf}, CEP ${form.cep}`
-      : entrega === 'retirada_franca'
-        ? `Retirada — ${POLOS.franca.endereco}`
-        : `Retirada — ${POLOS.cassia.endereco}`
-
-    const id = addOrder({ ...form, entrega, enderecoEntrega, frete })
-    onConcluir({ id, total: totalFinal, frete, entrega })
+      const id = await addOrder({ ...form, entrega, enderecoEntrega, frete })
+      onConcluir({ id, total: totalFinal, frete, entrega })
+    } catch (err) {
+      alert('Erro ao registrar pedido. Tente novamente.')
+      console.error(err)
+    }
+    setSubmitting(false)
   }
 
   const opcoesEntrega = [
@@ -183,7 +191,7 @@ export default function Checkout({ onBack, onConcluir }) {
             <div className={styles.field}>
               <label className={styles.label}>Nome completo *</label>
               <input className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
-                value={form.name} onChange={set('name')} placeholder="Maria Silva" />
+                value={form.name} onChange={set('name')} placeholder="Márcia Melo" />
               {errors.name && <span className={styles.error}>{errors.name}</span>}
             </div>
 
@@ -302,8 +310,8 @@ export default function Checkout({ onBack, onConcluir }) {
             </div>
           )}
 
-          <button className={styles.confirmBtn} onClick={handleSubmit}>
-            Confirmar e ver Pix
+          <button className={styles.confirmBtn} onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Registrando pedido...' : 'Confirmar pedido'}
           </button>
         </div>
       </div>

@@ -10,28 +10,44 @@ export async function fetchOrders() {
 }
 
 export async function createOrder({ customerData, cart, subtotal, shipping, total, paymentMethod }) {
-  // 1. Upsert cliente
-  const { data: customer, error: customerError } = await supabase
+  // ── 1. Busca cliente existente pelo telefone ──────────────────────
+  //    NÃO usa upsert para não sobrescrever dados de outro cliente
+  const phone = customerData.phone?.replace(/\D/g, '') // normaliza só dígitos
+
+  let customer = null
+
+  // Tenta achar pelo telefone normalizado
+  const { data: existing } = await supabase
     .from('customers')
-    .upsert(
-      {
+    .select('*')
+    .or(`phone.eq.${customerData.phone},phone.eq.${phone}`)
+    .maybeSingle()
+
+  if (existing) {
+    // Cliente já existe — usa o registro existente sem sobrescrever nome
+    customer = existing
+  } else {
+    // Cliente novo — cria registro
+    const { data: created, error: createError } = await supabase
+      .from('customers')
+      .insert([{
         name:      customerData.name,
         phone:     customerData.phone,
         instagram: customerData.instagram || null,
         address:   customerData.entrega === 'entrega' ? customerData.enderecoEntrega : null,
-      },
-      { onConflict: 'phone', ignoreDuplicates: false }
-    )
-    .select()
-    .single()
-  if (customerError) throw customerError
+      }])
+      .select()
+      .single()
+    if (createError) throw createError
+    customer = created
+  }
 
-  // 2. Cria pedido
+  // ── 2. Cria o pedido vinculado ao cliente encontrado/criado ───────
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert([{
       customer_id:        customer.id,
-      customer_name:      customerData.name,
+      customer_name:      customerData.name,   // nome informado neste pedido
       customer_phone:     customerData.phone,
       customer_instagram: customerData.instagram || null,
       delivery_type:      customerData.entrega,
@@ -46,8 +62,7 @@ export async function createOrder({ customerData, cart, subtotal, shipping, tota
     .single()
   if (orderError) throw orderError
 
-  // 3. Cria itens — converte flavorChoices { [id]: qty } para
-  //    array [{ flavorId, flavorName, qty }] com nomes legíveis
+  // ── 3. Cria itens com sabores ─────────────────────────────────────
   const items = cart.map((i) => {
     let flavor_choices = null
     if (i.flavorChoices && i.flavors) {

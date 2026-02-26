@@ -1,240 +1,395 @@
 .page {
-  max-width: 500px;
-  margin: 40px auto;
-  padding: 0 20px 80px;
-  animation: fadeUp 0.4s var(--ease);
+  min-height: 100dvh;
+  background: var(--beige-light);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px 80px;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+.container {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.logoTop { display: flex; justify-content: center; margin-bottom: 32px; }
-.logoTopImg { width: 52px; height: 52px; object-fit: contain; opacity: 0.7; }
+/* ── Confirmação ─────────────────────────── */
+.confirmCard {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
 
-/* Confirmação */
-.eyebrow {
+.checkIcon {
+  width: 56px;
+  height: 56px;
+  background: var(--success);
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--success);
-  margin-bottom: 14px;
-}
-
-.checkCircle {
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: var(--success);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  justify-content: center;
+  margin: 0 auto 16px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: 38px;
+  font-size: 28px;
   color: var(--brown-dark);
-  line-height: 1.15;
-  margin-bottom: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
 }
 
 .subtitle {
   font-size: 14px;
   color: var(--muted);
-  line-height: 1.7;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--muted);
   font-weight: 300;
-  margin-bottom: 32px;
+  line-height: 1.6;
 }
 
-.divider { height: 1px; background: var(--beige-mid); margin-bottom: 28px; }
-
-/* Valor */
-.valorSection { margin-bottom: 28px; }
-.valorLabel {
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--muted); font-weight: 600; margin-bottom: 6px;
-}
-.valor {
-  font-family: var(--font-display);
-  font-size: 46px;
-  color: var(--brown-dark);
-  letter-spacing: 0.01em;
-  line-height: 1;
+/* ── Seleção de método ───────────────────── */
+.metodosGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Métodos */
-.metodos { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-
-.metodoBtn {
+.metodoCard {
+  background: var(--white);
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 18px;
-  background: var(--white);
-  border: 1.5px solid var(--beige-mid);
-  border-radius: var(--radius-lg);
-  text-align: left;
-  width: 100%;
+  cursor: pointer;
   transition: all 0.18s;
-  color: var(--ink);
+  text-align: left;
 }
 
-.metodoBtn:hover {
+.metodoCard:hover {
   border-color: var(--brown-light);
-  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-.metodoIcon {
-  width: 40px; height: 40px;
-  background: var(--beige-light);
-  border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
+.metodoIconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(0,189,174,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
 .metodoInfo { flex: 1; }
 
-.metodoLabel { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
-.metodoSub   { display: block; font-size: 12px; color: var(--muted); font-weight: 300; margin-top: 2px; }
-
-/* Voltar */
-.voltarMetodo {
-  background: none; border: none;
-  color: var(--muted); font-size: 12px; font-weight: 500;
-  padding: 0; margin-bottom: 22px;
-  transition: color 0.18s;
+.metodoNome {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
 }
-.voltarMetodo:hover { color: var(--brown); }
 
-/* Pix */
-.pixLabel {
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--muted); font-weight: 600; margin-bottom: 10px;
+.metodoDesc {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.metodoArrow {
+  font-size: 18px;
+  color: var(--beige-mid);
+}
+
+/* ── Painel de método ────────────────────── */
+.metodoPainel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.voltarBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  transition: color 0.15s;
+}
+.voltarBtn:hover { color: var(--brown); }
+
+/* ── PIX ─────────────────────────────────── */
+.pixCard {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pixHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pixTitulo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--brown-dark);
+}
+
+.pixValor {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brown-dark);
+}
+
+.pixPassos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pixPasso {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.pixNum {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--beige-mid);
+  color: var(--brown);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .pixKeyBox {
+  background: var(--beige-light);
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.pixKeyLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.pixKeyRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: var(--white);
-  border: 1.5px solid var(--beige-mid);
-  border-radius: var(--radius-lg);
-  padding: 15px 18px;
-  margin-bottom: 22px;
+  flex-wrap: wrap;
 }
 
-.pixKey { font-size: 14px; font-weight: 500; color: var(--brown-dark); word-break: break-all; }
-
-.copyBtn {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--brown-dark); color: var(--cream);
-  border: none; border-radius: var(--radius-md);
-  padding: 8px 14px; font-size: 12px; font-weight: 600;
-  white-space: nowrap; flex-shrink: 0;
-  transition: background 0.18s;
-}
-.copyBtn:hover { background: var(--brown); }
-.copyBtn.copied { background: var(--success); }
-
-/* Passo a passo */
-.pixSteps {
-  display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;
+.pixKey {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--brown-dark);
+  word-break: break-all;
 }
 
-.step {
-  display: flex; align-items: center; gap: 12px;
-  font-size: 13px; color: var(--muted); font-weight: 300;
-}
-
-.step span {
-  width: 22px; height: 22px;
-  border-radius: 50%;
+.copiarBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: var(--brown-dark);
   color: var(--cream);
-  font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.18s;
+  white-space: nowrap;
   flex-shrink: 0;
 }
+.copiarBtn:hover { background: var(--brown); }
+.copiado { background: var(--success) !important; }
 
-.step strong { color: var(--brown-dark); font-weight: 600; }
-
-/* Cartão */
-.cartaoSection { margin-bottom: 24px; }
-
-.cartaoInfo {
-  background: var(--white);
-  border: 1.5px solid var(--beige-mid);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 16px;
+.pixAviso {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+  text-align: center;
+  line-height: 1.5;
 }
 
-.mpLogo {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 600; color: var(--ink);
-  margin-bottom: 12px;
+/* ── CARTÃO ──────────────────────────────── */
+.cartaoCard {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.cartaoIconWrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(37,211,102,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.cartaoTitulo {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--brown-dark);
+  font-weight: 500;
 }
 
 .cartaoDesc {
-  font-size: 13px; color: var(--muted); line-height: 1.65;
-  font-weight: 300; margin-bottom: 14px;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 300px;
 }
 
-.cartaoFeatures {
-  list-style: none;
-  display: flex; flex-direction: column; gap: 6px;
+.cartaoChecks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
-.cartaoFeatures li {
-  font-size: 13px; color: var(--muted); font-weight: 300;
-  display: flex; align-items: center; gap: 8px;
+.cartaoCheck {
+  font-size: 13px;
+  color: #4a7c59;
+  font-weight: 500;
 }
 
-.cartaoFeatures li::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-  flex-shrink: 0;
-}
-
-.pagarBtn {
-  width: 100%;
-  background: #009ee3;
+.whatsappBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #25D366;
   color: white;
   border: none;
   border-radius: var(--radius-lg);
-  padding: 16px;
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.06em;
-  transition: background 0.2s;
+  padding: 14px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: all 0.18s;
+  margin-top: 4px;
 }
-.pagarBtn:hover:not(:disabled) { background: #007ab8; }
-.pagarBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.whatsappBtn:hover { background: #1db954; transform: translateY(-1px); }
 
-/* Nota e novo pedido */
-.note {
-  font-size: 13px; color: var(--muted); line-height: 1.65;
-  font-weight: 300; margin-bottom: 24px;
-  padding: 14px 16px;
-  background: var(--white);
+/* ── Botão novo pedido ───────────────────── */
+.novoPedidoBtn {
+  background: transparent;
   border: 1px solid var(--beige-mid);
-  border-radius: var(--radius-md);
-}
-
-.novoBtn {
-  background: none;
-  border: 1.5px solid var(--beige-mid);
   color: var(--muted);
   border-radius: var(--radius-lg);
-  padding: 13px; font-size: 11px; font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  width: 100%; transition: all 0.18s;
+  padding: 13px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  width: 100%;
 }
-.novoBtn:hover { border-color: var(--brown); color: var(--brown); }
+.novoPedidoBtn:hover { border-color: var(--brown-light); color: var(--brown); }
+
+@media (max-width: 480px) {
+  .page       { padding: 24px 16px 60px; }
+  .pixKeyRow  { flex-direction: column; align-items: flex-start; }
+  .copiarBtn  { width: 100%; justify-content: center; }
+}
+
+.comprovWrapper {
+  background: var(--beige-light);
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.comprovTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brown-dark);
+  letter-spacing: 0.01em;
+}
+
+.comprovDesc {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.5;
+  max-width: 260px;
+}
+
+.comprovBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #25D366;
+  color: white;
+  border: none;
+  border-radius: 100px;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: all 0.18s;
+  box-shadow: 0 4px 14px rgba(37,211,102,0.35);
+  margin-top: 4px;
+}
+.comprovBtn:hover {
+  background: #20c75e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37,211,102,0.45);
+}
