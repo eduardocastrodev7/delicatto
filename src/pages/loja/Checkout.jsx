@@ -191,7 +191,7 @@ export default function Checkout({ onBack, onConcluir }) {
             <div className={styles.field}>
               <label className={styles.label}>Nome completo *</label>
               <input className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
-                value={form.name} onChange={set('name')} placeholder="Márcia Melo" />
+                value={form.name} onChange={set('name')} placeholder="Marcia Melo" />
               {errors.name && <span className={styles.error}>{errors.name}</span>}
             </div>
 
