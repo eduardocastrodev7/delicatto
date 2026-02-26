@@ -15,6 +15,8 @@ export function AppProvider({ children }) {
   // ── Carrega dados iniciais do Supabase ────────
   useEffect(() => {
     loadProducts()
+    loadOrders()
+    loadCustomers()
   }, [])
 
   const loadProducts = async () => {
