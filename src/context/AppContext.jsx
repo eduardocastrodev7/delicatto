@@ -48,28 +48,33 @@ export function AppProvider({ children }) {
   }
 
   // ── Normalização (snake_case → camelCase) ─────
-  const normalizeOrder = (o) => ({
-    id:                 o.id,
-    customerName:       o.customer_name,
-    customerPhone:      o.customer_phone,
-    customerInstagram:  o.customer_instagram,
-    endereco:           o.address,
-    entrega:            o.delivery_type,
-    items:              (o.order_items || []).map((i) => ({ name: i.name, qty: i.qty, price: i.price, flavorChoices: i.flavor_choices || null })),
-    subtotal:           parseFloat(o.subtotal),
-    frete:              parseFloat(o.shipping),
-    total:              parseFloat(o.total),
-    status:             o.status,
-    metodoPagamento:    o.payment_method,
-    date:               new Date(o.created_at).toLocaleDateString('pt-BR'),
-  })
+  const normalizeOrder = (o) => {
+    const createdAt = new Date(o.created_at)
+    return {
+      id:                 o.id,
+      customerName:       o.customer_name,
+      customerPhone:      o.customer_phone,
+      customerInstagram:  o.customer_instagram,
+      endereco:           o.address,
+      entrega:            o.delivery_type,
+      items:              (o.order_items || []).map((i) => ({ name: i.name, qty: i.qty, price: i.price, flavorChoices: i.flavor_choices || null })),
+      subtotal:           parseFloat(o.subtotal),
+      frete:              parseFloat(o.shipping),
+      total:              parseFloat(o.total),
+      status:             o.status,
+      metodoPagamento:    o.payment_method,
+      created_at:         o.created_at,           // mantém original para filtros
+      createdAtDate:      createdAt,              // objeto Date para comparação
+      date:               createdAt.toLocaleDateString('pt-BR'),
+    }
+  }
 
   const normalizeCustomer = (c) => ({
     id:          c.id,
-    name:        c.name,
-    phone:       c.phone,
-    instagram:   c.instagram,
-    endereco:    c.address,
+    name:        c.name        || '',
+    phone:       c.phone       || '',
+    instagram:   c.instagram   || '',
+    endereco:    c.address     || '',
     totalOrders: (c.orders || []).length,
     pedidos:     (c.orders || []).map((o) => ({
       id:    o.id,

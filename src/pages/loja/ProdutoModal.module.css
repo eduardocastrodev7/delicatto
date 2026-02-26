@@ -10,6 +10,7 @@
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .modal {
+  animation: modalEnter 0.3s cubic-bezier(0.34, 1.36, 0.64, 1) both;
   position: fixed;
   top: 50%;
   left: 50%;
@@ -54,7 +55,8 @@
 /* Foto */
 .photo {
   position: relative;
-  height: 240px;
+  width: 100%;
+  height: 260px;            /* altura fixa — não invade o conteúdo */
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -62,6 +64,7 @@
   justify-content: center;
   gap: 8px;
   overflow: hidden;
+  background: #1a110a;
 }
 
 .photoRing {
@@ -319,7 +322,7 @@
 
 @media (max-width: 520px) {
   .content { padding: 18px 18px 22px; }
-  .photo { height: 190px; }
+  .photo { height: 200px; }
   .name { font-size: 22px; }
   .price { font-size: 24px; }
   .header { flex-direction: column; gap: 4px; }
@@ -330,7 +333,189 @@
 .photoImg {
   width: 100%;
   height: 100%;
+  object-fit: contain;        /* não corta — mostra a imagem inteira */
+  background: #1a110a;
+  transition: transform 0.25s var(--ease);
+}
+.photoImg:hover { transform: scale(1.04); }
+
+/* ── Zoom hint badge ──────────────────────── */
+.zoomHint {
+  position: absolute;
+  bottom: 50px;
+  right: 12px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 100px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: white;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.photo:hover .zoomHint { opacity: 1; }
+
+/* ── Carrossel ───────────────────────────── */
+.carouselBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background 0.18s;
+  z-index: 5;
+}
+.carouselBtn:hover { background: rgba(0,0,0,0.7); }
+.carouselPrev { left: 10px; }
+.carouselNext { right: 10px; }
+
+.carouselDots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 5;
+}
+.carouselDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  border: none;
+  transition: all 0.2s;
+}
+.carouselDotActive {
+  background: white;
+  width: 18px;
+  border-radius: 100px;
+}
+
+.carouselThumbs {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 5;
+}
+.carouselThumb {
+  width: 40px; height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.18s;
+  cursor: pointer;
+  padding: 0;
+}
+.carouselThumb img {
+  width: 100%; height: 100%;
   object-fit: cover;
+  display: block;
+}
+.carouselThumbActive { border-color: white; }
+
+/* ── Lightbox ────────────────────────────── */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.93);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.18s ease;
+}
+
+.lightboxContent {
+  position: relative;
+  max-width: 92vw;
+  max-height: 88vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxImg {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 8px;
+  animation: zoomIn 0.22s ease;
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.lightboxClose {
+  position: fixed;
+  top: 16px; right: 16px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s;
+  z-index: 10000;
+}
+.lightboxClose:hover { background: rgba(255,255,255,0.22); }
+
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s;
+  z-index: 10000;
+}
+.lightboxNav:hover { background: rgba(255,255,255,0.25); }
+.lightboxPrev { left: -60px; }
+.lightboxNext { right: -60px; }
+
+.lightboxDots {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+.lightboxDot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  border: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.lightboxDotActive {
+  background: white;
+  width: 20px;
+  border-radius: 100px;
 }
 
 /* ── Sabores ─────────────────────────────────── */

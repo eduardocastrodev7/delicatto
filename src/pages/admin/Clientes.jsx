@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import shared from './admin.shared.module.css'
 import styles from './Clientes.module.css'
@@ -12,19 +12,108 @@ const WhatsAppIcon = () => (
 export default function Clientes() {
   const { customers } = useApp()
   const [expandido, setExpandido] = useState(null)
+  const [busca, setBusca]         = useState('')
+  const [exportando, setExportando] = useState(false)
 
   const toggle = (id) => setExpandido((prev) => prev === id ? null : id)
 
+  // Busca por nome, telefone ou instagram
+  const filtrados = useMemo(() => {
+    const q = busca.toLowerCase().trim().replace(/^@/, '') // remove @ se digitado
+    if (!q) return customers
+    return customers.filter(c =>
+      c.name?.toLowerCase().includes(q) ||
+      c.phone?.replace(/\D/g, '').includes(q.replace(/\D/g, '')) ||
+      c.instagram?.toLowerCase().replace(/^@/, '').includes(q)
+    )
+  }, [customers, busca])
+
+  // Exportar CSV
+  const exportarCSV = () => {
+    setExportando(true)
+    try {
+      const linhas = [
+        ['Nome', 'Telefone', 'Instagram', 'Total de Pedidos', 'Endereço'],
+        ...customers.map(c => [
+          c.name || '',
+          c.phone || '',
+          c.instagram ? `@${c.instagram}` : '',
+          c.totalOrders || 0,
+          c.endereco || '',
+        ])
+      ]
+      const csv = linhas
+        .map(l => l.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n')
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+      const url  = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href     = url
+      link.download = `clientes-delicatto-${new Date().toISOString().slice(0,10)}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (e) { alert('Erro ao exportar: ' + e.message) }
+    setExportando(false)
+  }
+
   return (
     <div>
+      {/* ── Barra de busca + exportar ── */}
+      <div className={styles.topBar}>
+        <div className={styles.searchWrap}>
+          <svg className={styles.searchIcon} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <circle cx="6.5" cy="6.5" r="4.5"/>
+            <path d="M10.5 10.5L14 14"/>
+          </svg>
+          <input
+            className={styles.searchInput}
+            placeholder="Buscar por nome, telefone ou @instagram..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+          />
+          {busca && (
+            <button className={styles.clearBtn} onClick={() => setBusca('')}>×</button>
+          )}
+        </div>
+
+        <button
+          className={styles.exportBtn}
+          onClick={exportarCSV}
+          disabled={exportando || customers.length === 0}
+        >
+          {exportando ? 'Exportando...' : (
+            <>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M6.5 1v8M3.5 6l3 3 3-3"/>
+                <path d="M1 10v1a1 1 0 001 1h9a1 1 0 001-1v-1"/>
+              </svg>
+              Exportar CSV
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Contador */}
+      <div className={styles.contador}>
+        {busca
+          ? `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''} para "${busca}"`
+          : `${customers.length} cliente${customers.length !== 1 ? 's' : ''} cadastrado${customers.length !== 1 ? 's' : ''}`
+        }
+      </div>
+
       {customers.length === 0 && (
         <div className={styles.empty}>Nenhum cliente cadastrado ainda.</div>
       )}
 
+      {filtrados.length === 0 && busca && (
+        <div className={styles.empty}>Nenhum cliente encontrado para "{busca}".</div>
+      )}
+
       <div className={styles.list}>
-        {customers.map((c) => (
+        {filtrados.map((c) => (
           <div key={c.id} className={styles.clienteCard}>
-            {/* Linha principal */}
             <div className={styles.clienteMain}>
               <div className={styles.clienteAvatar}>
                 {c.name.charAt(0).toUpperCase()}
@@ -47,8 +136,7 @@ export default function Clientes() {
               <div className={styles.clienteActions}>
                 <a
                   href={`https://wa.me/55${c.phone.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
+                  target="_blank" rel="noreferrer"
                   className={styles.waLink}
                 >
                   <WhatsAppIcon />
@@ -71,19 +159,18 @@ export default function Clientes() {
               </div>
             </div>
 
-            {/* Histórico de pedidos expandido */}
             {expandido === c.id && c.pedidos?.length > 0 && (
               <div className={styles.historico}>
                 <div className={styles.historicoTitle}>Histórico de pedidos</div>
                 {c.pedidos.map((p) => (
                   <div key={p.id} className={styles.historicoPedido}>
-                    <span className={styles.historicoId}>#{p.id}</span>
+                    <span className={styles.historicoId}>#{p.id?.toString().slice(-6)}</span>
                     <span className={styles.historicoData}>{p.date}</span>
                     <span className={styles.historicoItens}>
-                      {p.items.map((i) => `${i.name} ×${i.qty}`).join(', ')}
+                      {p.items?.map((i) => `${i.name} ×${i.qty}`).join(', ')}
                     </span>
                     <span className={styles.historicoTotal}>
-                      R$ {p.total.toFixed(2).replace('.', ',')}
+                      R$ {(p.total||0).toFixed(2).replace('.', ',')}
                     </span>
                   </div>
                 ))}

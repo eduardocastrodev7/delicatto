@@ -7,30 +7,31 @@ import styles from './Produtos.module.css'
 const EMPTY = {
   name: '', price: '', category: '', description: '',
   ingredients: '', prep_time: '', available: true,
-  image_url: '',
+  images: [],
   has_flavors: false, flavor_slots: '', flavors: [],
 }
 
 const CATEGORIAS = ['Brigadeiros', 'Trufas', 'Especiais', 'Boxes']
+const MAX_IMAGES = 3
 
 export default function Produtos() {
   const { products, addProduct, updateProduct, deleteProduct } = useApp()
-  const [showModal, setShowModal]     = useState(false)
-  const [editing, setEditing]         = useState(null)
-  const [form, setForm]               = useState(EMPTY)
-  const [saving, setSaving]           = useState(false)
-  const [errors, setErrors]           = useState({})
-  const [uploadingImg, setUploadingImg] = useState(false)
+  const [showModal, setShowModal]       = useState(false)
+  const [editing, setEditing]           = useState(null)
+  const [form, setForm]                 = useState(EMPTY)
+  const [saving, setSaving]             = useState(false)
+  const [errors, setErrors]             = useState({})
+  const [uploadingIdx, setUploadingIdx] = useState(null) // índice sendo enviado
   const [confirmDelete, setConfirmDelete] = useState(null)
-  const [newFlavor, setNewFlavor]     = useState('')
+  const [newFlavor, setNewFlavor]       = useState('')
   const fileRef = useRef()
 
-  const openAdd = () => {
-    setEditing(null); setForm(EMPTY); setErrors({}); setShowModal(true)
-  }
+  const openAdd = () => { setEditing(null); setForm(EMPTY); setErrors({}); setShowModal(true) }
 
   const openEdit = (p) => {
     setEditing(p)
+    // Normaliza: se tem image_url mas não images, popula
+    const imgs = p.images?.length ? p.images : (p.image_url ? [p.image_url] : [])
     setForm({
       name:         p.name        || '',
       price:        p.price       || '',
@@ -39,7 +40,7 @@ export default function Produtos() {
       ingredients:  p.ingredients || '',
       prep_time:    p.prep_time   || '',
       available:    p.available   ?? true,
-      image_url:    p.image_url   || '',
+      images:       imgs,
       has_flavors:  p.has_flavors  || false,
       flavor_slots: p.flavor_slots || '',
       flavors:      p.flavors      || [],
@@ -55,56 +56,35 @@ export default function Produtos() {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
+    if (form.images.length >= MAX_IMAGES) { alert(`Máximo de ${MAX_IMAGES} fotos por produto.`); return }
+    if (file.size > 3 * 1024 * 1024) { alert('Imagem muito grande. Máximo 3MB.'); return }
 
-    // Valida tamanho (2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Imagem muito grande. Máximo 2MB.')
-      return
-    }
-
-    setUploadingImg(true)
+    const idx = form.images.length
+    setUploadingIdx(idx)
     try {
       const ext  = file.name.split('.').pop().toLowerCase()
       const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
       const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(path, file, { contentType: file.type, upsert: false })
-
+        .from('product-images').upload(path, file, { contentType: file.type })
       if (uploadError) throw uploadError
-
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(path)
-
-      setForm((prev) => ({ ...prev, image_url: data.publicUrl }))
-    } catch (err) {
-      console.error('Upload error:', err)
-      alert('Erro ao enviar imagem: ' + err.message)
-    }
-    setUploadingImg(false)
-    // Limpa input para permitir selecionar o mesmo arquivo novamente
+      const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+      setForm((prev) => ({ ...prev, images: [...prev.images, data.publicUrl] }))
+    } catch (err) { alert('Erro ao enviar: ' + err.message) }
+    setUploadingIdx(null)
     e.target.value = ''
   }
+
+  const removeImage = (idx) =>
+    setForm((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== idx) }))
 
   // ── Sabores ───────────────────────────────────
   const addFlavor = () => {
     const name = newFlavor.trim()
-    if (!name) return
-    if (form.flavors.find(f => f.name.toLowerCase() === name.toLowerCase())) return
-    setForm((prev) => ({
-      ...prev,
-      flavors: [...prev.flavors, { id: Date.now().toString(), name }]
-    }))
+    if (!name || form.flavors.find(f => f.name.toLowerCase() === name.toLowerCase())) return
+    setForm((prev) => ({ ...prev, flavors: [...prev.flavors, { id: Date.now().toString(), name }] }))
     setNewFlavor('')
   }
-
-  const removeFlavor = (id) =>
-    setForm((prev) => ({ ...prev, flavors: prev.flavors.filter(f => f.id !== id) }))
-
-  const handleFlavorKeyDown = (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); addFlavor() }
-  }
+  const removeFlavor = (id) => setForm((prev) => ({ ...prev, flavors: prev.flavors.filter(f => f.id !== id) }))
 
   // ── Validação e salvar ────────────────────────
   const validate = () => {
@@ -113,10 +93,8 @@ export default function Produtos() {
     if (!form.price)           e.price    = 'Preço obrigatório'
     if (!form.category.trim()) e.category = 'Categoria obrigatória'
     if (form.has_flavors) {
-      if (!form.flavor_slots || parseInt(form.flavor_slots) < 1)
-        e.flavor_slots = 'Informe quantos slots o cliente precisa preencher'
-      if (form.flavors.length < 2)
-        e.flavors = 'Adicione pelo menos 2 sabores'
+      if (!form.flavor_slots || parseInt(form.flavor_slots) < 1) e.flavor_slots = 'Informe os slots'
+      if (form.flavors.length < 2) e.flavors = 'Adicione pelo menos 2 sabores'
     }
     return e
   }
@@ -134,16 +112,15 @@ export default function Produtos() {
         ingredients:  form.ingredients.trim(),
         prep_time:    form.prep_time.trim(),
         available:    form.available,
-        image_url:    form.image_url || null,
+        images:       form.images,
+        image_url:    form.images[0] || null, // mantém compatibilidade
         has_flavors:  form.has_flavors,
         flavor_slots: form.has_flavors ? parseInt(form.flavor_slots) : null,
         flavors:      form.has_flavors ? form.flavors : [],
       }
       editing ? await updateProduct(editing.id, payload) : await addProduct(payload)
       setShowModal(false)
-    } catch (err) {
-      alert('Erro ao salvar: ' + err.message)
-    }
+    } catch (err) { alert('Erro ao salvar: ' + err.message) }
     setSaving(false)
   }
 
@@ -165,41 +142,45 @@ export default function Produtos() {
             <th>Produto</th><th>Categoria</th><th>Preço</th><th>Status</th><th>Ações</th>
           </tr></thead>
           <tbody>
-            {products.map((p) => (
-              <tr key={p.id}>
-                <td>
-                  <div className={styles.prodName}>
-                    {p.image_url
-                      ? <img src={p.image_url} alt={p.name} className={styles.thumb} />
-                      : <div className={styles.thumbPlaceholder}>{p.name.charAt(0)}</div>
-                    }
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{p.name}</div>
-                      <div className={styles.prodMeta}>
-                        {p.prep_time && <span>{p.prep_time}</span>}
-                        {p.has_flavors && <span className={styles.flavorBadge}>🎨 {p.flavor_slots} sabores</span>}
+            {products.map((p) => {
+              const thumb = p.images?.[0] || p.image_url
+              return (
+                <tr key={p.id}>
+                  <td>
+                    <div className={styles.prodName}>
+                      {thumb
+                        ? <img src={thumb} alt={p.name} className={styles.thumb} />
+                        : <div className={styles.thumbPlaceholder}>{p.name.charAt(0)}</div>
+                      }
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{p.name}</div>
+                        <div className={styles.prodMeta}>
+                          {p.prep_time && <span>{p.prep_time}</span>}
+                          {p.has_flavors && <span className={styles.flavorBadge}>🎨 {p.flavor_slots} sabores</span>}
+                          {p.images?.length > 1 && <span>📷 {p.images.length} fotos</span>}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td style={{ color: 'var(--muted)', fontSize: 13 }}>{p.category}</td>
-                <td style={{ fontWeight: 700, color: 'var(--brown-dark)' }}>
-                  R$ {parseFloat(p.price).toFixed(2).replace('.', ',')}
-                </td>
-                <td>
-                  <span className={shared.badge}
-                    style={p.available
-                      ? { background: '#4a7c5918', color: '#4a7c59' }
-                      : { background: '#9a887818', color: '#9a8878' }}>
-                    {p.available ? 'Ativo' : 'Inativo'}
-                  </span>
-                </td>
-                <td>
-                  <button className={styles.editBtn} onClick={() => openEdit(p)}>Editar</button>
-                  <button className={styles.delBtn}  onClick={() => setConfirmDelete(p)}>Excluir</button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td style={{ color: 'var(--muted)', fontSize: 13 }}>{p.category}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--brown-dark)' }}>
+                    R$ {parseFloat(p.price).toFixed(2).replace('.', ',')}
+                  </td>
+                  <td>
+                    <span className={shared.badge}
+                      style={p.available
+                        ? { background: '#4a7c5918', color: '#4a7c59' }
+                        : { background: '#9a887818', color: '#9a8878' }}>
+                      {p.available ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                  <td>
+                    <button className={styles.editBtn} onClick={() => openEdit(p)}>Editar</button>
+                    <button className={styles.delBtn}  onClick={() => setConfirmDelete(p)}>Excluir</button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -209,7 +190,6 @@ export default function Produtos() {
         <>
           <div className={shared.overlay} onClick={() => setShowModal(false)} />
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>{editing ? 'Editar doce' : 'Novo doce'}</h2>
               <button className={styles.modalClose} onClick={() => setShowModal(false)}>
@@ -221,37 +201,58 @@ export default function Produtos() {
 
             <div className={styles.modalBody}>
 
-              {/* Foto */}
+              {/* ── Fotos ── */}
               <div className={styles.section}>
-                <div className={styles.sectionTitle}>Foto do produto</div>
-                <div className={styles.imageRow}>
-                  {form.image_url
-                    ? <img src={form.image_url} alt="preview" className={styles.imagePreview} />
-                    : <div className={styles.imagePlaceholder}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--muted)' }}>
-                          <rect x="3" y="3" width="18" height="18" rx="2"/>
-                          <circle cx="8.5" cy="8.5" r="1.5"/>
-                          <path d="M21 15l-5-5L5 21"/>
-                        </svg>
-                        <span>Sem foto</span>
-                      </div>
-                  }
-                  <div className={styles.imageActions}>
-                    <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} style={{ display: 'none' }} />
-                    <button className={styles.uploadBtn} onClick={() => fileRef.current.click()} disabled={uploadingImg}>
-                      {uploadingImg ? 'Enviando...' : form.image_url ? 'Trocar foto' : 'Enviar foto'}
-                    </button>
-                    {form.image_url && (
-                      <button className={styles.removeImgBtn} onClick={() => setForm(f => ({ ...f, image_url: '' }))}>
-                        Remover
-                      </button>
-                    )}
-                    <p className={styles.imageHint}>JPG, PNG ou WEBP · Máx. 2MB</p>
-                  </div>
+                <div className={styles.sectionTitle}>
+                  Fotos do produto
+                  <span className={styles.sectionHint}>{form.images.length}/{MAX_IMAGES} fotos</span>
                 </div>
+
+                <div className={styles.imagesGrid}>
+                  {/* Fotos existentes */}
+                  {form.images.map((url, idx) => (
+                    <div key={idx} className={styles.imageThumbWrap}>
+                      <img src={url} alt={`foto ${idx + 1}`} className={styles.imageThumb} />
+                      {idx === 0 && <div className={styles.imagePrincipal}>Principal</div>}
+                      <button className={styles.imageRemove} onClick={() => removeImage(idx)}>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 1l8 8M9 1L1 9"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* Slot para adicionar nova foto */}
+                  {form.images.length < MAX_IMAGES && (
+                    <button
+                      className={styles.imageAddSlot}
+                      onClick={() => fileRef.current.click()}
+                      disabled={uploadingIdx !== null}
+                    >
+                      {uploadingIdx !== null
+                        ? <span className={styles.uploadingSpinner}>↑</span>
+                        : <>
+                            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M11 2v18M2 11h18"/>
+                            </svg>
+                            <span>Adicionar foto</span>
+                          </>
+                      }
+                    </button>
+                  )}
+                </div>
+
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                />
+                <span className={styles.hint}>JPG, PNG ou WEBP · Máx. 3MB · A primeira foto é a principal</span>
               </div>
 
-              {/* Informações básicas */}
+              {/* ── Informações básicas ── */}
               <div className={styles.section}>
                 <div className={styles.sectionTitle}>Informações básicas</div>
                 <div className={styles.fieldRow}>
@@ -290,8 +291,7 @@ export default function Produtos() {
                   </div>
                   <div className={styles.field} style={{ flex: 1 }}>
                     <label className={styles.label}>Prazo de preparo</label>
-                    <input className={styles.input}
-                      value={form.prep_time} onChange={set('prep_time')}
+                    <input className={styles.input} value={form.prep_time} onChange={set('prep_time')}
                       placeholder="Ex: 24h de antecedência" />
                   </div>
                 </div>
@@ -304,46 +304,35 @@ export default function Produtos() {
                 </div>
               </div>
 
-              {/* Ingredientes */}
+              {/* ── Ingredientes ── */}
               <div className={styles.section}>
                 <div className={styles.sectionTitle}>Ingredientes & Alérgenos</div>
                 <textarea className={styles.textarea} rows={3}
                   value={form.ingredients} onChange={set('ingredients')}
                   placeholder="Ex: Leite condensado, manteiga, chocolate belga. Contém: leite, glúten." />
-                <span className={styles.hint}>Inclua os alérgenos ao final (Contém: ...)</span>
               </div>
 
-              {/* Sabores */}
+              {/* ── Sabores ── */}
               <div className={styles.section}>
                 <div className={styles.sectionTitle}>Escolha de sabores</div>
-
                 <label className={styles.toggle}>
                   <input type="checkbox" checked={form.has_flavors} onChange={set('has_flavors')} />
-                  <span className={styles.toggleTrack}>
-                    <span className={styles.toggleThumb} />
-                  </span>
-                  <span className={styles.toggleLabel}>
-                    Permitir que o cliente escolha os sabores
-                  </span>
+                  <span className={styles.toggleTrack}><span className={styles.toggleThumb} /></span>
+                  <span className={styles.toggleLabel}>Permitir que o cliente escolha os sabores</span>
                 </label>
 
                 {form.has_flavors && (
                   <div className={styles.flavorsConfig}>
-                    {/* Quantidade de slots */}
                     <div className={styles.field} style={{ maxWidth: 220, marginBottom: 16 }}>
                       <label className={styles.label}>Quantos sabores o cliente escolhe? *</label>
                       <input className={`${styles.input} ${errors.flavor_slots ? styles.inputErr : ''}`}
                         type="number" min="1" max="100"
-                        value={form.flavor_slots} onChange={set('flavor_slots')}
-                        placeholder="Ex: 4 para uma caixa de 4" />
+                        value={form.flavor_slots} onChange={set('flavor_slots')} placeholder="Ex: 4" />
                       {errors.flavor_slots && <span className={styles.err}>{errors.flavor_slots}</span>}
-                      <span className={styles.hint}>Total de unidades que o cliente vai distribuir entre os sabores</span>
                     </div>
 
-                    {/* Lista de sabores disponíveis */}
                     <label className={styles.label}>Sabores disponíveis *</label>
                     {errors.flavors && <span className={styles.err} style={{ display: 'block', marginBottom: 8 }}>{errors.flavors}</span>}
-
                     <div className={styles.flavorsList}>
                       {form.flavors.map((f) => (
                         <div key={f.id} className={styles.flavorTag}>
@@ -356,33 +345,23 @@ export default function Produtos() {
                         </div>
                       ))}
                     </div>
-
                     <div className={styles.flavorAdd}>
-                      <input
-                        className={styles.input}
-                        value={newFlavor}
+                      <input className={styles.input} value={newFlavor}
                         onChange={(e) => setNewFlavor(e.target.value)}
-                        onKeyDown={handleFlavorKeyDown}
-                        placeholder="Nome do sabor (Ex: Chocolate, Morango...)"
-                        style={{ marginBottom: 0 }}
-                      />
-                      <button className={styles.flavorAddBtn} onClick={addFlavor} type="button">
-                        + Adicionar
-                      </button>
+                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addFlavor())}
+                        placeholder="Nome do sabor (Ex: Chocolate...)" style={{ marginBottom: 0 }} />
+                      <button className={styles.flavorAddBtn} onClick={addFlavor} type="button">+ Adicionar</button>
                     </div>
-                    <span className={styles.hint}>Pressione Enter ou clique em Adicionar</span>
                   </div>
                 )}
               </div>
 
-              {/* Visibilidade */}
+              {/* ── Visibilidade ── */}
               <div className={styles.section}>
                 <div className={styles.sectionTitle}>Visibilidade</div>
                 <label className={styles.toggle}>
                   <input type="checkbox" checked={form.available} onChange={set('available')} />
-                  <span className={styles.toggleTrack}>
-                    <span className={styles.toggleThumb} />
-                  </span>
+                  <span className={styles.toggleTrack}><span className={styles.toggleThumb} /></span>
                   <span className={styles.toggleLabel}>
                     {form.available ? 'Disponível para venda' : 'Indisponível no momento'}
                   </span>
@@ -406,9 +385,7 @@ export default function Produtos() {
           <div className={shared.overlay} onClick={() => setConfirmDelete(null)} />
           <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.confirmTitle}>Excluir doce?</h3>
-            <p className={styles.confirmText}>
-              "<strong>{confirmDelete.name}</strong>" será removido permanentemente do cardápio.
-            </p>
+            <p className={styles.confirmText}>"{confirmDelete.name}" será removido permanentemente.</p>
             <div className={styles.confirmActions}>
               <button className={styles.cancelBtn} onClick={() => setConfirmDelete(null)}>Cancelar</button>
               <button className={styles.deleteConfirmBtn} onClick={() => handleDelete(confirmDelete.id)}>Sim, excluir</button>

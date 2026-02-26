@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext'
 import { STATUS_LABEL, STATUS_COLOR, STATUS_FLOW } from '../../data/mock'
 import shared from './admin.shared.module.css'
@@ -14,8 +15,36 @@ const METODO_LABEL = {
   cartao: 'Cartão',
 }
 
+const MESES = [
+  'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
+]
+
 export default function Pedidos() {
   const { orders, updateOrderStatus } = useApp()
+
+  const now   = new Date()
+  const [mes, setMes]       = useState(now.getMonth())
+  const [ano, setAno]       = useState(now.getFullYear())
+  const [filtroStatus, setFiltroStatus] = useState('todos')
+  const [busca, setBusca]   = useState('')
+
+  const anosDisponiveis = useMemo(() => {
+    const s = new Set(orders.map(o => (o.createdAtDate || new Date(o.created_at)).getFullYear()).filter(a => !isNaN(a)))
+    s.add(now.getFullYear())
+    return [...s].sort((a, b) => b - a)
+  }, [orders])
+
+  const pedidosFiltrados = useMemo(() => orders.filter(o => {
+    const d      = o.createdAtDate || new Date(o.created_at)
+    const mesOk  = !isNaN(d) && d.getMonth() === mes && d.getFullYear() === ano
+    const statusOk = filtroStatus === 'todos' || o.status === filtroStatus
+    const q      = busca.toLowerCase().trim()
+    const buscaOk = !q
+      || o.customerName?.toLowerCase().includes(q)
+      || o.customerPhone?.replace(/\D/g,'').includes(q.replace(/\D/g,''))
+    return mesOk && statusOk && buscaOk
+  }), [orders, mes, ano, filtroStatus, busca])
 
   // Próximos status disponíveis para cada status atual
   const proximosStatus = (atual) => {
@@ -27,12 +56,40 @@ export default function Pedidos() {
 
   return (
     <div>
-      {orders.length === 0 && (
-        <div className={styles.emptyState}>Nenhum pedido ainda.</div>
+      {/* ── Filtros ── */}
+      <div className={styles.filterBar}>
+        <select className={styles.filterSelect} value={mes} onChange={e => setMes(Number(e.target.value))}>
+          {MESES.map((m, i) => <option key={i} value={i}>{m}</option>)}
+        </select>
+        <select className={styles.filterSelect} value={ano} onChange={e => setAno(Number(e.target.value))}>
+          {anosDisponiveis.map(a => <option key={a} value={a}>{a}</option>)}
+        </select>
+        <select className={styles.filterSelect} value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
+          <option value="todos">Todos os status</option>
+          <option value="aguardando_pagamento">Aguardando pagamento</option>
+          <option value="pago">Pago</option>
+          <option value="em_preparo">Em preparo</option>
+          <option value="pronto">Pronto</option>
+          <option value="entregue">Entregue</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <input
+          className={styles.filterSearch}
+          placeholder="Buscar cliente..."
+          value={busca}
+          onChange={e => setBusca(e.target.value)}
+        />
+        <span className={styles.filterCount}>
+          {pedidosFiltrados.length} pedido{pedidosFiltrados.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {pedidosFiltrados.length === 0 && (
+        <div className={styles.emptyState}>Nenhum pedido encontrado.</div>
       )}
 
       <div className={styles.list}>
-        {orders.map((o) => (
+        {pedidosFiltrados.map((o) => (
           <div key={o.id} className={styles.pedidoCard}>
             {/* Cabeçalho do card */}
             <div className={styles.pedidoHeader}>

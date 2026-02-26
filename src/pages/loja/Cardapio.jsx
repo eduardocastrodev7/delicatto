@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../../context/AppContext'
 import CartPanel from '../../components/CartPanel'
 import ProdutoModal from './ProdutoModal'
@@ -9,6 +9,16 @@ export default function Cardapio({ onCheckout }) {
   const [filterCat, setFilterCat]     = useState('Todos')
   const [showCart, setShowCart]       = useState(false)
   const [produtoAberto, setProdutoAberto] = useState(null)
+  const [cartBounce, setCartBounce]   = useState(false)
+  const prevCount = useRef(cartCount)
+
+  useEffect(() => {
+    if (cartCount > prevCount.current) {
+      setCartBounce(true)
+      setTimeout(() => setCartBounce(false), 400)
+    }
+    prevCount.current = cartCount
+  }, [cartCount])
 
   const categories = ['Todos', ...new Set(products.map((p) => p.category))]
   const filtered   = filterCat === 'Todos' ? products : products.filter((p) => p.category === filterCat)
@@ -142,7 +152,7 @@ export default function Cardapio({ onCheckout }) {
 
       {/* Barra flutuante */}
       {cartCount > 0 && (
-        <div className={styles.floatingCart} onClick={() => setShowCart(true)}>
+        <div className={`${styles.floatingCart} ${cartBounce ? styles.floatingCartBounce : ''}`} onClick={() => setShowCart(true)}>
           <span>{cartCount} {cartCount === 1 ? 'item' : 'itens'}</span>
           <span className={styles.floatingDot} />
           <span>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>

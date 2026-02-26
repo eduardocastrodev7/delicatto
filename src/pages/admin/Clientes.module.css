@@ -146,3 +146,80 @@
 .historicoData  { color: var(--muted); font-weight: 300; min-width: 80px; }
 .historicoItens { flex: 1; color: var(--ink); font-weight: 300; }
 .historicoTotal { font-weight: 700; color: var(--brown-dark); white-space: nowrap; }
+
+/* ── Barra topo ──────────────────────────────── */
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.searchWrap {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  background: var(--white);
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-md);
+  padding: 9px 36px 9px 36px;
+  font-size: 13px;
+  color: var(--ink);
+  transition: border-color 0.15s;
+}
+.searchInput:focus { outline: none; border-color: var(--brown-light); }
+.searchInput::placeholder { color: var(--muted); }
+
+.clearBtn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--muted);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.clearBtn:hover { color: var(--ink); }
+
+.exportBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--brown-dark);
+  color: var(--cream);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.18s;
+  cursor: pointer;
+}
+.exportBtn:hover:not(:disabled) { background: var(--brown); }
+.exportBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.contador {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  font-weight: 400;
+}

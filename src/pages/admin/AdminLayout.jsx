@@ -1,10 +1,25 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import AdminPage from './AdminPage'
+import { useEffect } from 'react'
 import styles from './AdminLayout.module.css'
 
 export default function AdminLayout() {
   const { admin, logoutAdmin } = useAuth()
+
+  // Troca manifest e theme-color para PWA do admin
+  useEffect(() => {
+    const link = document.querySelector("link[rel='manifest']")
+    const theme = document.querySelector("meta[name='theme-color']")
+    const prev = link?.href
+    const prevTheme = theme?.content
+    if (link) link.href = '/manifest-admin.json'
+    if (theme) theme.content = '#3d2010'
+    return () => {
+      if (link && prev) link.href = prev
+      if (theme && prevTheme) theme.content = prevTheme
+    }
+  }, [])
 
   return (
     <div className={styles.shell}>

@@ -82,3 +82,137 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+
+/* ═══════════════════════════════════════════════
+   ANIMAÇÕES GLOBAIS — Delicatto
+═══════════════════════════════════════════════ */
+
+/* ── Entrada de página ───────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.7); }
+  70%  { transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-6px); }
+  60%      { transform: translateY(-2px); }
+}
+
+/* ── Utilitários de animação ─────────────────── */
+.anim-fade-up   { animation: fadeUp      0.38s var(--ease) both; }
+.anim-fade-in   { animation: fadeIn      0.28s ease both; }
+.anim-scale-in  { animation: scaleIn     0.28s var(--ease) both; }
+.anim-pop-in    { animation: popIn       0.32s var(--ease) both; }
+.anim-slide-right { animation: slideInRight 0.3s var(--ease) both; }
+
+/* Delays escalonados para listas */
+.anim-delay-1  { animation-delay: 0.05s; }
+.anim-delay-2  { animation-delay: 0.10s; }
+.anim-delay-3  { animation-delay: 0.15s; }
+.anim-delay-4  { animation-delay: 0.20s; }
+.anim-delay-5  { animation-delay: 0.25s; }
+
+/* ── Skeleton loader ─────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--beige-mid) 25%,
+    var(--beige-light) 50%,
+    var(--beige-mid) 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Toast notification ──────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: var(--brown-dark);
+  color: var(--cream);
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(40,20,8,0.3);
+  z-index: 9000;
+  white-space: nowrap;
+  animation: fadeUp 0.28s var(--ease) both;
+  pointer-events: none;
+}
+.toast-success { background: #2d6a4f; }
+.toast-error   { background: #8c3030; }
+
+/* ── Hover micro-interações ──────────────────── */
+.hover-lift {
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Ripple em botões ────────────────────────── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: inherit;
+}
+.btn-ripple:active::after { opacity: 1; }
+
+/* ── Modal overlay ───────────────────────────── */
+.modal-overlay-anim {
+  animation: fadeIn 0.2s ease both;
+}
+.modal-content-anim {
+  animation: scaleIn 0.25s var(--ease) both;
+}
+
+/* ── Redução de movimento (acessibilidade) ───── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
