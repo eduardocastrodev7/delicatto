@@ -14,7 +14,7 @@ export default function Header({ view, setView }) {
       <header className={styles.header}>
         <div className={styles.inner}>
           <button className={styles.logoBtn} onClick={() => setView('loja')}>
-            <img src="/logo-lettering.png" alt="Delicatto Doceria" className={styles.logoImg} />
+            <img src="/logo-lettering-light.png" alt="Delicatto Doceria" className={styles.logoImg} />
           </button>
 
           <nav className={styles.nav}>

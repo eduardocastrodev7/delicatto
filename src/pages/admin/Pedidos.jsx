@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
 import { STATUS_LABEL, STATUS_COLOR, STATUS_FLOW } from '../../data/mock'
 import shared from './admin.shared.module.css'
@@ -29,22 +29,32 @@ export default function Pedidos() {
   const [filtroStatus, setFiltroStatus] = useState('todos')
   const [busca, setBusca]   = useState('')
 
-  const anosDisponiveis = useMemo(() => {
-    const s = new Set(orders.map(o => (o.createdAtDate || new Date(o.created_at)).getFullYear()).filter(a => !isNaN(a)))
-    s.add(now.getFullYear())
-    return [...s].sort((a, b) => b - a)
+  const [anosDisponiveis, setAnosDisponiveis] = useState([now.getFullYear()])
+  const [pedidosFiltrados, setPedidosFiltrados] = useState([])
+
+  useEffect(() => {
+    const anos = new Set(orders.map(o => {
+      const d = o.createdAtDate || new Date(o.created_at)
+      return isNaN(d) ? null : d.getFullYear()
+    }).filter(Boolean))
+    anos.add(now.getFullYear())
+    setAnosDisponiveis([...anos].sort((a, b) => b - a))
   }, [orders])
 
-  const pedidosFiltrados = useMemo(() => orders.filter(o => {
-    const d      = o.createdAtDate || new Date(o.created_at)
-    const mesOk  = !isNaN(d) && d.getMonth() === mes && d.getFullYear() === ano
-    const statusOk = filtroStatus === 'todos' || o.status === filtroStatus
-    const q      = busca.toLowerCase().trim()
-    const buscaOk = !q
-      || o.customerName?.toLowerCase().includes(q)
-      || o.customerPhone?.replace(/\D/g,'').includes(q.replace(/\D/g,''))
-    return mesOk && statusOk && buscaOk
-  }), [orders, mes, ano, filtroStatus, busca])
+  useEffect(() => {
+    const resultado = orders.filter(o => {
+      const d        = o.createdAtDate || new Date(o.created_at)
+      const mesOk    = !isNaN(d) && d.getMonth() === mes && d.getFullYear() === ano
+      const statusOk = filtroStatus === 'todos' || o.status === filtroStatus
+      const q        = busca.toLowerCase().trim()
+      const nome     = (o.customerName  || '').toLowerCase()
+      const tel      = (o.customerPhone || '').replace(/\D/g, '')
+      const qTel     = q.replace(/\D/g, '')
+      const buscaOk  = !q || nome.includes(q) || (qTel && tel.includes(qTel))
+      return mesOk && statusOk && buscaOk
+    })
+    setPedidosFiltrados(resultado)
+  }, [orders, mes, ano, filtroStatus, busca])
 
   // Próximos status disponíveis para cada status atual
   const proximosStatus = (atual) => {

@@ -514,3 +514,54 @@
 
   .floatingCart { min-width: 180px; padding: 12px 20px; bottom: 20px; }
 }
+
+/* ══════════════════════════════════════════════
+   CARD HORIZONTAL — telas muito pequenas (<400px)
+   Foto à esquerda, info à direita
+══════════════════════════════════════════════ */
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .card {
+    flex-direction: row;
+    align-items: stretch;
+    border-radius: var(--radius-lg);
+  }
+
+  .cardPhoto {
+    width: 110px;
+    height: auto;
+    flex-shrink: 0;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+
+  /* badges não cabem no card horizontal */
+  .cardCatBadge,
+  .cardFlavorBadge { display: none; }
+
+  .cardBody {
+    padding: 12px 12px 8px;
+    gap: 4px;
+  }
+  .cardName    { font-size: 13px; }
+  .cardDesc    { display: none; }
+  .cardRating  { display: none; }
+
+  .cardFooter {
+    padding: 8px 12px 12px;
+    flex-direction: row;
+    align-items: center;
+    border-top: 1px solid var(--beige-light);
+  }
+  .cardPriceLabel { display: none; }
+  .cardPriceValue { font-size: 16px; }
+
+  .addBtn {
+    width: auto;
+    padding: 8px 14px;
+  }
+  .addBtn svg { display: none; }
+}

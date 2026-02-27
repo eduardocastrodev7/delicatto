@@ -26,7 +26,7 @@ export default function AdminLayout() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.logoWrap}>
-            <img src="/logo-simbolo.png" alt="" className={styles.logoImg} />
+            <img src="/logo-simbolo-light.png" alt="" className={styles.logoImg} />
             <div className={styles.logoText}>
               <span className={styles.logoName}>Delicatto</span>
               <span className={styles.logoPainel}>Painel Admin</span>

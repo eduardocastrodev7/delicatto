@@ -42,7 +42,7 @@
 .cartBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.18);
   color: var(--cream);
@@ -56,6 +56,43 @@
 .cartBtn:hover {
   background: rgba(255,255,255,0.2);
   border-color: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+.cartBtn:active { transform: scale(0.97); }
+
+.cartIconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #e8a020;
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  animation: popIn 0.25s var(--ease);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.cartLabel {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 
 /* Cadeado admin discreto */

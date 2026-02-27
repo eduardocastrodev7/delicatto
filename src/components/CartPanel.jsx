@@ -1,12 +1,12 @@
 import { useApp } from '../context/AppContext'
 import styles from './CartPanel.module.css'
 
-const CandyIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-    <circle cx="12" cy="9" r="2.5"/>
-  </svg>
-)
+const GRADIENTS = {
+  'Brigadeiros': ['#3a1c0a', '#7a3f1a'],
+  'Trufas':      ['#2d1f3d', '#6b4c80'],
+  'Especiais':   ['#1f3028', '#4a7c59'],
+  'Boxes':       ['#302010', '#8c6030'],
+}
 
 export default function CartPanel({ onClose, onCheckout }) {
   const { cart, addToCart, removeFromCart, cartTotal } = useApp()
@@ -16,53 +16,100 @@ export default function CartPanel({ onClose, onCheckout }) {
     if (onCheckout) onCheckout()
   }
 
+  const totalQty = cart.reduce((s, i) => s + i.qty, 0)
+
   return (
     <>
       <div className={styles.overlay} onClick={onClose} />
       <div className={styles.panel}>
+
+        {/* Header */}
         <div className={styles.header}>
           <div>
             <div className={styles.title}>Seu pedido</div>
-            <div className={styles.subtitle}>{cart.length} {cart.length === 1 ? 'item selecionado' : 'itens selecionados'}</div>
+            <div className={styles.subtitle}>
+              {totalQty === 0 ? 'Nenhum item ainda' : `${totalQty} ${totalQty === 1 ? 'item' : 'itens'}`}
+            </div>
           </div>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Fechar">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M1 1l12 12M13 1L1 13"/>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M1 1l10 10M11 1L1 11"/>
             </svg>
           </button>
         </div>
 
+        {/* Itens */}
         <div className={styles.items}>
           {cart.length === 0 && (
             <div className={styles.empty}>
-              <div className={styles.emptyLine} />
-              Nenhum item adicionado
-              <br />ao seu pedido ainda.
-              <div className={styles.emptyLine} />
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.2" className={styles.emptyIcon}>
+                <path d="M8 8h4l4.5 18h12l3.5-12H14"/>
+                <circle cx="17" cy="32" r="2" fill="currentColor" stroke="none"/>
+                <circle cx="27" cy="32" r="2" fill="currentColor" stroke="none"/>
+              </svg>
+              <p>Nenhum item adicionado<br />ao seu pedido ainda.</p>
             </div>
           )}
 
-          {cart.map((item) => (
-            <div key={item.id} className={styles.item}>
-              <div className={styles.itemThumb}>
-                <CandyIcon className={styles.itemIcon} />
+          {cart.map((item) => {
+            const [c1, c2] = GRADIENTS[item.category] || ['#3a1c0a', '#7a3f1a']
+            const thumb = item.images?.[0] || item.image_url
+
+            // Sabores escolhidos formatados
+            const sabores = item.flavorChoices && item.flavors
+              ? Object.entries(item.flavorChoices)
+                  .map(([id, qty]) => {
+                    const s = item.flavors.find(f => f.id === id || f.id === String(id))
+                    return s ? `${qty}× ${s.name}` : null
+                  }).filter(Boolean)
+              : []
+
+            return (
+              <div key={item.cartItemId || item.id} className={styles.item}>
+                {/* Thumb: foto real ou gradiente */}
+                <div className={styles.itemThumb}>
+                  {thumb
+                    ? <img src={thumb} alt={item.name} className={styles.itemThumbImg} />
+                    : <div className={styles.itemThumbGrad}
+                        style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}>
+                        <span className={styles.itemInitials}>
+                          {item.name.split(' ').slice(0,2).map(w=>w[0]).join('')}
+                        </span>
+                      </div>
+                  }
+                </div>
+
+                {/* Info */}
+                <div className={styles.info}>
+                  <div className={styles.itemName}>{item.name}</div>
+                  <div className={styles.itemUnit}>
+                    R$ {parseFloat(item.price).toFixed(2).replace('.', ',')} / un
+                  </div>
+                  {/* Sabores escolhidos */}
+                  {sabores.length > 0 && (
+                    <div className={styles.itemFlavors}>
+                      {sabores.join(' · ')}
+                    </div>
+                  )}
+                </div>
+
+                {/* Controles + subtotal */}
+                <div className={styles.rightCol}>
+                  <div className={styles.controls}>
+                    <button onClick={() => removeFromCart(item.cartItemId || item.id)}>−</button>
+                    <span className={styles.qty}>{item.qty}</span>
+                    <button onClick={() => addToCart(item)}>+</button>
+                  </div>
+                  <div className={styles.subtotal}>
+                    R$ {(item.price * item.qty).toFixed(2).replace('.', ',')}
+                  </div>
+                </div>
               </div>
-              <div className={styles.info}>
-                <div className={styles.itemName}>{item.name}</div>
-                <div className={styles.itemUnit}>R$ {parseFloat(item.price).toFixed(2).replace('.', ',')} / un</div>
-              </div>
-              <div className={styles.controls}>
-                <button onClick={() => removeFromCart(item.id)}>−</button>
-                <span className={styles.qty}>{item.qty}</span>
-                <button onClick={() => addToCart(item)}>+</button>
-              </div>
-              <div className={styles.subtotal}>
-                R$ {(item.price * item.qty).toFixed(2).replace('.', ',')}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
+        {/* Footer */}
         <div className={styles.footer}>
           <div className={styles.totalRow}>
             <span className={styles.totalLabel}>Total</span>
@@ -73,6 +120,9 @@ export default function CartPanel({ onClose, onCheckout }) {
             onClick={handleCheckout}
             disabled={cart.length === 0}
           >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M2 7h10M7 2l5 5-5 5"/>
+            </svg>
             Finalizar pedido
           </button>
         </div>

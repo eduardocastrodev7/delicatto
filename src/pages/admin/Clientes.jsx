@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
 import shared from './admin.shared.module.css'
 import styles from './Clientes.module.css'
@@ -18,14 +18,22 @@ export default function Clientes() {
   const toggle = (id) => setExpandido((prev) => prev === id ? null : id)
 
   // Busca por nome, telefone ou instagram
-  const filtrados = useMemo(() => {
-    const q = busca.toLowerCase().trim().replace(/^@/, '') // remove @ se digitado
-    if (!q) return customers
-    return customers.filter(c =>
-      c.name?.toLowerCase().includes(q) ||
-      c.phone?.replace(/\D/g, '').includes(q.replace(/\D/g, '')) ||
-      c.instagram?.toLowerCase().replace(/^@/, '').includes(q)
-    )
+  const [filtrados, setFiltrados] = useState([])
+
+  useEffect(() => {
+    const q = busca.toLowerCase().trim().replace(/^@/, '')
+    if (!q) {
+      setFiltrados(customers)
+      return
+    }
+    const resultado = customers.filter(c => {
+      const nome     = (c.name     || '').toLowerCase()
+      const telefone = (c.phone    || '').replace(/\D/g, '')
+      const insta    = (c.instagram|| '').toLowerCase().replace(/^@/, '')
+      const qTel     = q.replace(/\D/g, '')
+      return nome.includes(q) || (qTel && telefone.includes(qTel)) || insta.includes(q)
+    })
+    setFiltrados(resultado)
   }, [customers, busca])
 
   // Exportar CSV
