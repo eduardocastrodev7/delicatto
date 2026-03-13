@@ -29,8 +29,10 @@
 .logoImg {
   height: 44px;
   width: auto;
+  max-width: 160px;
   object-fit: contain;
-  /* logo transparente sobre marrom — funciona perfeitamente */
+  object-position: left center;
+  display: block;
 }
 
 .nav {

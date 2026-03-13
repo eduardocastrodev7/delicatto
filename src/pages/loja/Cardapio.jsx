@@ -39,28 +39,20 @@ export default function Cardapio({ onCheckout }) {
 
       {/* ── Hero ── */}
       <div className={styles.hero}>
-        <div className={styles.heroText}>
-          <div className={styles.heroEyebrow}>Confeitaria Artesanal</div>
-          <h1 className={styles.heroTitle}>
-            Doces feitos<br />com <em>requinte</em>
-          </h1>
-          <p className={styles.heroSub}>
-            Escolha seus favoritos, monte seu pedido e finalize com Pix.
-          </p>
+        <div className={styles.heroInner}>
+          <div className={styles.heroText}>
+            <h1 className={styles.heroTitle}>Doces<br /><em>Artesanais.</em></h1>
+            <p className={styles.heroSub}>Exclusividade e sabor em cada mordida.<br />Faça sua encomenda dos personalizados para a Páscoa de 2026.</p>
+            <p className={styles.heroUrgency}>Unidades limitadas!</p>
+          </div>
+          <img src="/logo-simbolo.png" aria-hidden="true" className={styles.heroLogo} />
         </div>
-        <div className={styles.heroSymbol}>
-          <img src="/logo-simbolo.png" alt="Delicatto" className={styles.heroSymbolImg} />
-        </div>
-      </div>
 
-      {/* ── Filtros ── */}
-      <div className={styles.filterSection}>
-        <div className={styles.filterRow}>
-          <span className={styles.filterLabel}>Filtrar</span>
+        <div className={styles.heroFilters}>
           {categories.map((c) => (
             <button
               key={c}
-              className={`${styles.catBtn} ${filterCat === c ? styles.catActive : ''}`}
+              className={`${styles.filterChip} ${filterCat === c ? styles.filterChipActive : ''}`}
               onClick={() => setFilterCat(c)}
             >
               {c}
@@ -69,91 +61,79 @@ export default function Cardapio({ onCheckout }) {
         </div>
       </div>
 
-      {/* ── Divisor ── */}
-      <div className={styles.sectionDivider}>
-        <span className={styles.sectionDividerTitle}>
-          {filterCat === 'Todos' ? 'Todos os doces' : filterCat}
-        </span>
-        <div className={styles.sectionDividerLine} />
-        <span className={styles.sectionDividerCount}>{filtered.length} itens</span>
-      </div>
+      {/* ── Conteúdo ── */}
+      <div className={styles.content}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>
+            {filterCat === 'Todos' ? 'Todos os produtos' : filterCat}
+          </h2>
+          <span className={styles.sectionCount}>{filtered.length} itens</span>
+        </div>
 
-      {/* ── Grid ── */}
-      <div className={styles.grid}>
-        {filtered.length === 0 && (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyStateIcon}>🍫</div>
-            <div className={styles.emptyStateText}>Nenhum produto disponível.</div>
-          </div>
-        )}
+        <div className={styles.grid}>
+          {filtered.length === 0 && (
+            <div className={styles.emptyState}>
+              <span>🍫</span>
+              <p>Nenhum produto disponível.</p>
+            </div>
+          )}
 
-        {filtered.map((p, i) => {
-          const qty = getQty(p.id)
-          return (
-            <div
-              key={p.id}
-              className={`${styles.card} ${!p.available ? styles.cardUnavailable : ''}`}
-              style={{ animationDelay: `${i * 0.05}s` }}
-              onClick={() => setProdutoAberto(p)}
-            >
-              {/* Foto */}
-              <div className={styles.cardPhoto}>
-                {(p.images?.[0] || p.image_url)
-                  ? <img src={p.images?.[0] || p.image_url} alt={p.name} className={styles.cardImg} loading="lazy" />
-                  : <PlaceholderPhoto name={p.name} category={p.category} />
-                }
-                {!p.available && <div className={styles.unavailableOverlay}>Indisponível</div>}
-                <div className={styles.cardCatBadge}>{p.category}</div>
-                {p.has_flavors && (
-                  <div className={styles.cardFlavorBadge}>🎨 Escolha sabores</div>
-                )}
-              </div>
-
-              {/* Corpo */}
-              <div className={styles.cardBody}>
-                <div className={styles.cardName}>{p.name}</div>
-                {p.description && <div className={styles.cardDesc}>{p.description}</div>}
-                <StarRating rating={p.rating} reviews={p.reviews} />
-              </div>
-
-              {/* Footer */}
-              <div className={styles.cardFooter}>
-                <div className={styles.cardPrice}>
-                  <span className={styles.cardPriceLabel}>a partir de</span>
-                  <span className={styles.cardPriceValue}>
-                    R$ {parseFloat(p.price).toFixed(2).replace('.', ',')}
-                  </span>
+          {filtered.map((p, i) => {
+            const qty   = getQty(p.id)
+            const thumb = p.images?.[0] || p.image_url
+            return (
+              <div
+                key={p.id}
+                className={`${styles.card} ${!p.available ? styles.cardUnavailable : ''}`}
+                style={{ animationDelay: `${i * 0.04}s` }}
+                onClick={() => setProdutoAberto(p)}
+              >
+                <div className={styles.cardPhoto}>
+                  {thumb
+                    ? <img src={thumb} alt={p.name} className={styles.cardImg} loading="lazy" />
+                    : <PlaceholderPhoto name={p.name} category={p.category} />
+                  }
+                  {!p.available && <div className={styles.unavailableOverlay}>Indisponível</div>}
+                  {p.has_flavors && <span className={styles.flavorTag}>Escolha os sabores</span>}
                 </div>
 
-                {p.available && (
-                  <div onClick={(e) => e.stopPropagation()}>
-                    {p.has_flavors ? (
-                      <button className={styles.addBtn} onClick={(e) => handleCardAdd(e, p)}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 1v8M1 5h8"/>
-                        </svg>
-                        {qty > 0 ? `+ Mais (${qty})` : 'Escolher sabores'}
-                      </button>
-                    ) : qty > 0 ? (
-                      <div className={styles.qtyControls}>
-                        <button onClick={(e) => handleCardRemove(e, p)}>−</button>
-                        <span>{qty}</span>
-                        <button onClick={(e) => handleCardAdd(e, p)}>+</button>
-                      </div>
-                    ) : (
-                      <button className={styles.addBtn} onClick={(e) => handleCardAdd(e, p)}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 1v8M1 5h8"/>
-                        </svg>
-                        Adicionar
-                      </button>
-                    )}
+                <div className={styles.cardBody}>
+                  <p className={styles.cardCategory}>{p.category}</p>
+                  <p className={styles.cardName}>{p.name}</p>
+                  {p.description && <p className={styles.cardDesc}>{p.description}</p>}
+                </div>
+
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardPrice}>
+                    <span className={styles.cardPriceFrom}>a partir de</span>
+                    <span className={styles.cardPriceValue}>
+                      R$ {parseFloat(p.price).toFixed(2).replace('.', ',')}
+                    </span>
                   </div>
-                )}
+
+                  {p.available && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      {qty > 0 && !p.has_flavors ? (
+                        <div className={styles.qtyControls}>
+                          <button onClick={(e) => handleCardRemove(e, p)}>−</button>
+                          <span>{qty}</span>
+                          <button onClick={(e) => handleCardAdd(e, p)}>+</button>
+                        </div>
+                      ) : (
+                        <button className={styles.addBtn} onClick={(e) => handleCardAdd(e, p)}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2">
+                            <path d="M6 1v10M1 6h10"/>
+                          </svg>
+                          {p.has_flavors && qty > 0 ? `(${qty}) Mais` : 'Adicionar'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
       {/* ── Carrinho flutuante ── */}
@@ -162,14 +142,7 @@ export default function Cardapio({ onCheckout }) {
           className={`${styles.floatingCart} ${cartBounce ? styles.floatingCartBounce : ''}`}
           onClick={() => setShowCart(true)}
         >
-          <div className={styles.floatingCartIcon}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M2 2h2l2.5 10h9l2-7H6"/>
-              <circle cx="9" cy="17" r="1.2" fill="currentColor" stroke="none"/>
-              <circle cx="15" cy="17" r="1.2" fill="currentColor" stroke="none"/>
-            </svg>
-            <span className={styles.floatingCartBadge}>{cartCount}</span>
-          </div>
+          <span className={styles.floatingCartCount}>{cartCount}</span>
           <span className={styles.floatingCartLabel}>Ver carrinho</span>
           <span className={styles.floatingCartTotal}>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
         </button>
@@ -191,37 +164,31 @@ export default function Cardapio({ onCheckout }) {
   )
 }
 
-// ── Placeholder sem foto ────────────────────────────────────────────
 export function PlaceholderPhoto({ name, category }) {
   const gradients = {
-    'Brigadeiros': ['#3a2010', '#6e3e20'],
-    'Trufas':      ['#28183a', '#5a3870'],
-    'Especiais':   ['#182818', '#385830'],
-    'Boxes':       ['#2a1a08', '#7a4e20'],
+    'Brigadeiros': ['#2e1508', '#5c3218'],
+    'Trufas':      ['#1e1228', '#3d2455'],
+    'Especiais':   ['#0e2018', '#1e4830'],
+    'Boxes':       ['#241408', '#5c3c18'],
   }
-  const [c1, c2] = gradients[category] || ['#281808', '#503010']
+  const [c1, c2] = gradients[category] || ['#241408', '#5c3218']
   const initials = name.split(' ').slice(0, 2).map(w => w[0]).join('')
   return (
     <div className={styles.placeholder}
-      style={{ background: `linear-gradient(145deg, ${c1} 0%, ${c2} 100%)` }}>
+      style={{ background: `linear-gradient(145deg, ${c1}, ${c2})` }}>
       <span className={styles.placeholderInitials}>{initials}</span>
-      <span className={styles.placeholderLabel}>foto em breve</span>
+      <span className={styles.placeholderLabel}>Foto em breve</span>
     </div>
   )
 }
 
-// ── StarRating ──────────────────────────────────────────────────────
 export function StarRating({ rating, reviews }) {
   if (!rating) return null
-  const full = Math.floor(rating)
   return (
     <div className={styles.cardRating}>
-      <div className={styles.cardStars}>
-        {[1,2,3,4,5].map((s) => (
-          <span key={s} className={s <= full ? styles.starFilled : styles.starEmpty}>★</span>
-        ))}
-      </div>
-      <span className={styles.cardReviews}>{rating} {reviews ? `(${reviews})` : ''}</span>
+      <span className={styles.starFilled}>★</span>
+      <span className={styles.cardRatingValue}>{rating}</span>
+      {reviews && <span className={styles.cardRatingCount}>({reviews})</span>}
     </div>
   )
 }

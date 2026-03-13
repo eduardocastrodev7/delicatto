@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { StarRating } from './Cardapio'
+import { fetchFlavorStocks } from '../../lib/stock'
 import styles from './ProdutoModal.module.css'
 
 // ── Lightbox ──────────────────────────────────────────────────────────
@@ -11,8 +12,8 @@ function Lightbox({ images, startIndex, onClose }) {
 
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === 'Escape') onClose()
-      if (e.key === 'ArrowLeft') prev()
+      if (e.key === 'Escape')     onClose()
+      if (e.key === 'ArrowLeft')  prev()
       if (e.key === 'ArrowRight') next()
     }
     window.addEventListener('keydown', handler)
@@ -26,14 +27,8 @@ function Lightbox({ images, startIndex, onClose }) {
           <path d="M1 1l16 16M17 1L1 17"/>
         </svg>
       </button>
-
       <div className={styles.lightboxContent} onClick={e => e.stopPropagation()}>
-        <img
-          src={images[current]}
-          alt={`foto ${current + 1}`}
-          className={styles.lightboxImg}
-        />
-
+        <img src={images[current]} alt={`foto ${current + 1}`} className={styles.lightboxImg} />
         {images.length > 1 && (
           <>
             <button className={`${styles.lightboxNav} ${styles.lightboxPrev}`} onClick={prev}>
@@ -50,8 +45,7 @@ function Lightbox({ images, startIndex, onClose }) {
               {images.map((_, i) => (
                 <button key={i}
                   className={`${styles.lightboxDot} ${i === current ? styles.lightboxDotActive : ''}`}
-                  onClick={() => setCurrent(i)}
-                />
+                  onClick={() => setCurrent(i)} />
               ))}
             </div>
           </>
@@ -90,7 +84,6 @@ function PhotoCarousel({ images, name, category, available, onOpenLightbox }) {
 
   return (
     <div className={styles.photo}>
-      {/* Imagem principal */}
       <img
         src={images[current]}
         alt={`${name} - foto ${current + 1}`}
@@ -98,8 +91,6 @@ function PhotoCarousel({ images, name, category, available, onOpenLightbox }) {
         onClick={() => onOpenLightbox(current)}
         style={{ cursor: 'zoom-in' }}
       />
-
-      {/* Badge lupa */}
       <div className={styles.zoomHint}>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="1.8">
           <circle cx="5" cy="5" r="3.5"/>
@@ -107,8 +98,6 @@ function PhotoCarousel({ images, name, category, available, onOpenLightbox }) {
           <path d="M4 5h2M5 4v2"/>
         </svg>
       </div>
-
-      {/* Navegação do carrossel */}
       {images.length > 1 && (
         <>
           <button className={`${styles.carouselBtn} ${styles.carouselPrev}`}
@@ -123,18 +112,13 @@ function PhotoCarousel({ images, name, category, available, onOpenLightbox }) {
               <path d="M5 2l5 5-5 5"/>
             </svg>
           </button>
-
-          {/* Dots */}
           <div className={styles.carouselDots}>
             {images.map((_, i) => (
               <button key={i}
                 className={`${styles.carouselDot} ${i === current ? styles.carouselDotActive : ''}`}
-                onClick={() => setCurrent(i)}
-              />
+                onClick={() => setCurrent(i)} />
             ))}
           </div>
-
-          {/* Thumbnails */}
           <div className={styles.carouselThumbs}>
             {images.map((url, i) => (
               <button key={i}
@@ -146,7 +130,6 @@ function PhotoCarousel({ images, name, category, available, onOpenLightbox }) {
           </div>
         </>
       )}
-
       <div className={styles.photoCategory}>{category}</div>
       {!available && <div className={styles.photoUnavailable}>Indisponível no momento</div>}
     </div>
@@ -156,17 +139,28 @@ function PhotoCarousel({ images, name, category, available, onOpenLightbox }) {
 // ── Modal principal ───────────────────────────────────────────────────
 export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, onVerCarrinho }) {
   const [flavorChoices, setFlavorChoices] = useState({})
-  const [choosingNew, setChoosingNew]     = useState(true) // sempre inicia escolhendo
+  const [choosingNew, setChoosingNew]     = useState(true)
   const [lightboxIdx, setLightboxIdx]     = useState(null)
+  const [flavorStocks, setFlavorStocks]   = useState({}) // { flavorId: { available, stock, name } }
+  const [loadingStock, setLoadingStock]   = useState(false)
+  const [stockError, setStockError]       = useState('')
 
-  // Normaliza images
-  const images = produto.images?.length ? produto.images
-    : produto.image_url ? [produto.image_url] : []
-
+  const images      = produto.images?.length ? produto.images : produto.image_url ? [produto.image_url] : []
   const totalEscolhido = Object.values(flavorChoices).reduce((s, v) => s + v, 0)
   const slotsTotal     = produto.flavor_slots || 0
   const slotsRestantes = slotsTotal - totalEscolhido
   const saboresOk      = !produto.has_flavors || totalEscolhido === slotsTotal
+
+  // Carrega estoque dos sabores ao abrir o modal
+  useEffect(() => {
+    if (produto.has_flavors && produto.track_stock && !produto.made_to_order) {
+      setLoadingStock(true)
+      fetchFlavorStocks(produto.id)
+        .then(data => setFlavorStocks(data))
+        .catch(err => console.error('Erro ao carregar estoque:', err))
+        .finally(() => setLoadingStock(false))
+    }
+  }, [produto.id, produto.has_flavors, produto.track_stock, produto.made_to_order])
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape' && lightboxIdx === null) onClose() }
@@ -181,21 +175,55 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
       const next    = current + delta
       if (next < 0) return prev
       if (delta > 0 && slotsRestantes <= 0) return prev
+
+      // Verifica estoque do sabor se houver controle
+      if (delta > 0 && produto.track_stock && !produto.made_to_order) {
+        const fs = flavorStocks[id]
+        if (fs && fs.available <= current) return prev // sem estoque
+      }
+
       const updated = { ...prev, [id]: next }
       if (updated[id] === 0) delete updated[id]
       return updated
     })
   }
 
-  const handleConfirmar = () => {
+  const handleConfirmar = async () => {
     if (!saboresOk) return
+    setStockError('')
     try {
-      onAdd(flavorChoices)
-    } catch(e) {
-      console.error('Erro ao adicionar ao carrinho:', e)
+      await onAdd(flavorChoices)
+      setFlavorChoices({})
+      setChoosingNew(false)
+      // Atualiza estoque local para refletir a reserva
+      if (produto.track_stock && !produto.made_to_order) {
+        setFlavorStocks(prev => {
+          const updated = { ...prev }
+          Object.entries(flavorChoices).forEach(([fId, qty]) => {
+            if (updated[fId]) {
+              updated[fId] = { ...updated[fId], available: Math.max(0, updated[fId].available - qty) }
+            }
+          })
+          return updated
+        })
+      }
+    } catch (e) {
+      setStockError(e.message || 'Estoque insuficiente. Tente novamente.')
     }
-    setFlavorChoices({})
-    setChoosingNew(false)
+  }
+
+  // Verifica se um sabor está disponível
+  const isFlavorAvailable = (flavorId) => {
+    if (!produto.track_stock || produto.made_to_order) return true
+    const fs = flavorStocks[flavorId]
+    if (!fs) return true // sem registro = sem controle
+    const jaEscolhido = flavorChoices[flavorId] || 0
+    return fs.available > jaEscolhido
+  }
+
+  const getFlavorStock = (flavorId) => {
+    if (!produto.track_stock || produto.made_to_order) return null
+    return flavorStocks[flavorId]?.available ?? null
   }
 
   return (
@@ -209,7 +237,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
           </svg>
         </button>
 
-        {/* Carrossel de fotos */}
         <PhotoCarousel
           images={images}
           name={produto.name}
@@ -218,7 +245,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
           onOpenLightbox={(idx) => setLightboxIdx(idx)}
         />
 
-        {/* Conteúdo */}
         <div className={styles.content}>
           <div className={styles.header}>
             <div>
@@ -229,6 +255,17 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
               R$ {parseFloat(produto.price).toFixed(2).replace('.', ',')}
             </div>
           </div>
+
+          {/* Prazo sob encomenda */}
+          {produto.made_to_order && produto.order_deadline && (
+            <div className={styles.mtoAlert}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="7" cy="7" r="6"/>
+                <path d="M7 4v3.5l2 2"/>
+              </svg>
+              <span>Sob encomenda — {produto.order_deadline}</span>
+            </div>
+          )}
 
           <p className={styles.description}>{produto.description}</p>
 
@@ -262,20 +299,25 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
             )}
           </div>
 
-          {/* Sabores */}
+          {/* ── Sabores ── */}
           {produto.has_flavors && produto.available && (
             <div className={styles.flavorsSection}>
               {qty > 0 && !choosingNew ? (
                 <div className={styles.unidadesAdicionadas}>
                   <div className={styles.unidadesHeader}>
-                    <div className={styles.flavorsTitle}>{qty} {qty === 1 ? 'unidade' : 'unidades'} no pedido</div>
-                    <button className={styles.maisUmaBtn} onClick={() => { setFlavorChoices({}); setChoosingNew(true) }}>
+                    <div className={styles.flavorsTitle}>
+                      {qty} {qty === 1 ? 'unidade' : 'unidades'} no pedido
+                    </div>
+                    <button className={styles.maisUmaBtn}
+                      onClick={() => { setFlavorChoices({}); setChoosingNew(true) }}>
                       + Adicionar mais uma
                     </button>
                   </div>
                   <p className={styles.unidadesDica}>Cada caixa tem sabores independentes.</p>
                   <div className={styles.modalActions}>
-                    <button className={styles.verCarrinhoBtn} onClick={onVerCarrinho}>Ver carrinho ({qty})</button>
+                    <button className={styles.verCarrinhoBtn} onClick={onVerCarrinho}>
+                      Ver carrinho ({qty})
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -290,29 +332,57 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
                       {slotsRestantes === 0 && <span className={styles.counterOk}> · completo!</span>}
                     </div>
                   </div>
+
                   <div className={styles.progressBar}>
                     <div className={styles.progressFill}
                       style={{ width: `${slotsTotal ? (totalEscolhido / slotsTotal) * 100 : 0}%` }} />
                   </div>
+
+                  {loadingStock && (
+                    <p className={styles.stockLoading}>Verificando disponibilidade...</p>
+                  )}
+
                   <div className={styles.flavorsList}>
                     {(produto.flavors || []).map((f) => {
-                      const chosen = flavorChoices[f.id] || 0
+                      const chosen    = flavorChoices[f.id] || 0
+                      const available = isFlavorAvailable(f.id)
+                      const stockQty  = getFlavorStock(f.id)
+                      const esgotado  = !available && chosen === 0
+
                       return (
-                        <div key={f.id} className={styles.flavorRow}>
-                          <span className={styles.flavorName}>{f.name}</span>
+                        <div key={f.id}
+                          className={`${styles.flavorRow} ${esgotado ? styles.flavorRowEsgotado : ''}`}>
+                          <div className={styles.flavorNameWrap}>
+                            <span className={styles.flavorName}>{f.name}</span>
+                            {esgotado && (
+                              <span className={styles.flavorEsgotadoTag}>Esgotado</span>
+                            )}
+                            {!esgotado && stockQty !== null && stockQty <= 5 && (
+                              <span className={styles.flavorStockWarn}>
+                                {stockQty === 1 ? 'Última unidade' : `${stockQty} restantes`}
+                              </span>
+                            )}
+                          </div>
                           <div className={styles.flavorQty}>
                             <button className={styles.flavorQtyBtn}
-                              onClick={() => setFlavor(f.id, -1)} disabled={chosen === 0}>−</button>
+                              onClick={() => setFlavor(f.id, -1)}
+                              disabled={chosen === 0}>−</button>
                             <span className={`${styles.flavorQtyNum} ${chosen > 0 ? styles.flavorQtyActive : ''}`}>
                               {chosen}
                             </span>
                             <button className={styles.flavorQtyBtn}
-                              onClick={() => setFlavor(f.id, 1)} disabled={slotsRestantes === 0}>+</button>
+                              onClick={() => setFlavor(f.id, 1)}
+                              disabled={slotsRestantes === 0 || esgotado || !available}>+</button>
                           </div>
                         </div>
                       )
                     })}
                   </div>
+
+                  {stockError && (
+                    <div className={styles.stockError}>{stockError}</div>
+                  )}
+
                   <button
                     className={`${styles.addBtn} ${!saboresOk ? styles.addBtnDisabled : ''}`}
                     onClick={handleConfirmar} disabled={!saboresOk}>
@@ -320,18 +390,26 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
                       ? `Escolha mais ${slotsRestantes} sabor${slotsRestantes !== 1 ? 'es' : ''}`
                       : qty > 0 ? `Confirmar unidade ${qty + 1}` : 'Adicionar ao pedido'}
                   </button>
+
                   {qty > 0 && choosingNew && (
-                    <button className={styles.cancelarNovaBtn} onClick={() => setChoosingNew(false)}>Cancelar</button>
+                    <button className={styles.cancelarNovaBtn} onClick={() => setChoosingNew(false)}>
+                      Cancelar
+                    </button>
                   )}
                 </>
               )}
             </div>
           )}
 
-          {/* Produto sem sabores */}
+          {/* ── Produto sem sabores ── */}
           {!produto.has_flavors && produto.available && (
             <div className={styles.actions}>
-              {qty > 0 ? (
+              {/* Esgotado sem encomenda */}
+              {!produto.made_to_order && produto.track_stock && produto.stock === 0 ? (
+                <div className={styles.unavailableMsg}>
+                  Este produto está esgotado no momento.
+                </div>
+              ) : qty > 0 ? (
                 <div className={styles.qtyRow}>
                   <div className={styles.qtyControls}>
                     <button onClick={onRemove}>−</button>
@@ -343,23 +421,32 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
                   </button>
                 </div>
               ) : (
-                <button className={styles.addBtn} onClick={() => { try { onAdd(null) } catch(e) { console.error(e) } }}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 1v12M1 7h12"/>
-                  </svg>
-                  Adicionar ao pedido
-                </button>
+                <>
+                  {stockError && <div className={styles.stockError}>{stockError}</div>}
+                  <button className={styles.addBtn} onClick={async () => {
+                    setStockError('')
+                    try { await onAdd(null) } catch (e) {
+                      setStockError(e.message || 'Estoque insuficiente.')
+                    }
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M7 1v12M1 7h12"/>
+                    </svg>
+                    Adicionar ao pedido
+                  </button>
+                </>
               )}
             </div>
           )}
 
           {!produto.available && (
-            <div className={styles.unavailableMsg}>Este doce não está disponível no momento.</div>
+            <div className={styles.unavailableMsg}>
+              Este doce não está disponível no momento.
+            </div>
           )}
         </div>
       </div>
 
-      {/* Lightbox */}
       {lightboxIdx !== null && (
         <Lightbox
           images={images}

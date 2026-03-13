@@ -698,3 +698,69 @@
   letter-spacing: 0.04em;
   backdrop-filter: blur(4px);
 }
+/* ── Adicionar ao final do ProdutoModal.module.css ── */
+
+/* Alerta sob encomenda */
+.mtoAlert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(176,128,96,0.1);
+  border: 1px solid rgba(176,128,96,0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #8c5c38;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+/* Linha de sabor esgotado */
+.flavorRowEsgotado {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.flavorNameWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.flavorEsgotadoTag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #c0392b;
+  background: rgba(192,57,43,0.08);
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+.flavorStockWarn {
+  font-size: 10px;
+  font-weight: 600;
+  color: #b08060;
+  background: rgba(176,128,96,0.1);
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+
+/* Erro de estoque */
+.stockError {
+  background: rgba(192,57,43,0.08);
+  border: 1px solid rgba(192,57,43,0.2);
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.stockLoading {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  padding: 8px 0;
+  font-style: italic;
+}

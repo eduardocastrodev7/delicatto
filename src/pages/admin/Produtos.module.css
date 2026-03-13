@@ -617,3 +617,39 @@
   font-weight: 300;
   margin-left: 8px;
 }
+/* ── Adicionar ao final do Produtos.module.css ── */
+
+.badgeOk {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(74,124,89,0.1);
+  color: #4a7c59;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.badgeEsgotado {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(192,57,43,0.1);
+  color: #c0392b;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.badgeMto {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(176,128,96,0.1);
+  color: #8c5c38;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.badgeNone {
+  color: #ccc;
+  font-size: 13px;
+}
