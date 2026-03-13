@@ -249,7 +249,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
           <div className={styles.header}>
             <div>
               <h2 className={styles.name}>{produto.name}</h2>
-              <StarRating rating={produto.rating} reviews={produto.reviews} />
             </div>
             <div className={styles.price}>
               R$ {parseFloat(produto.price).toFixed(2).replace('.', ',')}
@@ -280,20 +279,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
                 <div>
                   <div className={styles.infoLabel}>Ingredientes & Alérgenos</div>
                   <div className={styles.infoText}>{produto.ingredients}</div>
-                </div>
-              </div>
-            )}
-            {produto.prep_time && (
-              <div className={styles.infoCard}>
-                <div className={styles.infoIcon}>
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="10" cy="10" r="7"/>
-                    <path d="M10 6v4l2.5 2.5"/>
-                  </svg>
-                </div>
-                <div>
-                  <div className={styles.infoLabel}>Prazo de preparo</div>
-                  <div className={styles.infoText}>{produto.prep_time}</div>
                 </div>
               </div>
             )}

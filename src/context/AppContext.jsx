@@ -67,6 +67,7 @@ export function AppProvider({ children }) {
       total:           parseFloat(o.total),
       status:          o.status,
       metodoPagamento: o.payment_method,
+      pickupDate:      o.pickup_date || null,
       created_at:      o.created_at,
       createdAtDate:   createdAt,
       date:            createdAt.toLocaleDateString('pt-BR'),

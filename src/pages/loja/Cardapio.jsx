@@ -42,7 +42,7 @@ export default function Cardapio({ onCheckout }) {
         <div className={styles.heroInner}>
           <div className={styles.heroText}>
             <h1 className={styles.heroTitle}>Doces<br /><em>Artesanais.</em></h1>
-            <p className={styles.heroSub}>Exclusividade e sabor em cada mordida.<br />Faça sua encomenda dos personalizados para a Páscoa de 2026.</p>
+            <p className={styles.heroSub}>Exclusividade e sabor.<br />Faça sua encomenda dos personalizados para a Páscoa de 2026.</p>
             <p className={styles.heroUrgency}>Unidades limitadas!</p>
           </div>
           <img src="/logo-simbolo.png" aria-hidden="true" className={styles.heroLogo} />
@@ -94,7 +94,7 @@ export default function Cardapio({ onCheckout }) {
                     : <PlaceholderPhoto name={p.name} category={p.category} />
                   }
                   {!p.available && <div className={styles.unavailableOverlay}>Indisponível</div>}
-                  {p.has_flavors && <span className={styles.flavorTag}>Escolha os sabores</span>}
+
                 </div>
 
                 <div className={styles.cardBody}>

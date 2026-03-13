@@ -123,6 +123,20 @@
   margin-bottom: 4px;
 }
 
+.pickupDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a3e28;
+  background: rgba(176,128,96,0.12);
+  border: 1px solid rgba(176,128,96,0.25);
+  padding: 3px 9px;
+  border-radius: 100px;
+  margin-bottom: 5px;
+}
+
 .frete {
   font-size: 12px;
   color: var(--brown-light);

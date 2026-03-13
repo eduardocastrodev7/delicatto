@@ -10,13 +10,9 @@ export async function fetchOrders() {
 }
 
 export async function createOrder({ customerData, cart, subtotal, shipping, total, paymentMethod }) {
-  // ── 1. Busca cliente existente pelo telefone ──────────────────────
-  //    NÃO usa upsert para não sobrescrever dados de outro cliente
-  const phone = customerData.phone?.replace(/\D/g, '') // normaliza só dígitos
+  const phone = customerData.phone?.replace(/\D/g, '')
 
   let customer = null
-
-  // Tenta achar pelo telefone normalizado
   const { data: existing } = await supabase
     .from('customers')
     .select('*')
@@ -24,10 +20,8 @@ export async function createOrder({ customerData, cart, subtotal, shipping, tota
     .maybeSingle()
 
   if (existing) {
-    // Cliente já existe — usa o registro existente sem sobrescrever nome
     customer = existing
   } else {
-    // Cliente novo — cria registro
     const { data: created, error: createError } = await supabase
       .from('customers')
       .insert([{
@@ -42,16 +36,16 @@ export async function createOrder({ customerData, cart, subtotal, shipping, tota
     customer = created
   }
 
-  // ── 2. Cria o pedido vinculado ao cliente encontrado/criado ───────
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert([{
       customer_id:        customer.id,
-      customer_name:      customerData.name,   // nome informado neste pedido
+      customer_name:      customerData.name,
       customer_phone:     customerData.phone,
       customer_instagram: customerData.instagram || null,
       delivery_type:      customerData.entrega,
       address:            customerData.enderecoEntrega || null,
+      pickup_date:        customerData.dataRetirada || null,   // ← novo campo
       subtotal,
       shipping,
       total,
@@ -62,7 +56,6 @@ export async function createOrder({ customerData, cart, subtotal, shipping, tota
     .single()
   if (orderError) throw orderError
 
-  // ── 3. Cria itens com sabores ─────────────────────────────────────
   const items = cart.map((i) => {
     let flavor_choices = null
     if (i.flavorChoices && i.flavors) {
@@ -84,9 +77,7 @@ export async function createOrder({ customerData, cart, subtotal, shipping, tota
     }
   })
 
-  const { error: itemsError } = await supabase
-    .from('order_items')
-    .insert(items)
+  const { error: itemsError } = await supabase.from('order_items').insert(items)
   if (itemsError) throw itemsError
 
   return order

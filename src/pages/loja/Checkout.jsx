@@ -15,6 +15,19 @@ const POLOS = {
   },
 }
 
+// ── Datas de retirada por polo ─────────────────────────────────────────
+// Edite aqui para cada novo evento/período
+const DATAS_RETIRADA = {
+  franca: [
+    { id: 'f1', label: 'Domingo, 29 de março', sublabel: 'Páscoa 2026' },
+    { id: 'f2', label: 'Sábado, 04 de abril',  sublabel: 'Páscoa 2026' },
+  ],
+  cassia: [
+    { id: 'c1', label: 'Domingo, 29 de março', sublabel: 'Páscoa 2026' },
+    { id: 'c2', label: 'Sábado, 04 de abril',  sublabel: 'Páscoa 2026' },
+  ],
+}
+
 const detectarPolo = (cidade, uf) => {
   const c = cidade?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   if (c === 'franca' && uf === 'SP') return 'franca'
@@ -31,17 +44,20 @@ const STEPS = [
 export default function Checkout({ onBack, onConcluir }) {
   const { cart, cartTotal, addOrder } = useApp()
 
-  const [step, setStep]     = useState(1)
-  const [form, setForm]     = useState({
+  const [step, setStep]         = useState(1)
+  const [form, setForm]         = useState({
     name: '', phone: '', instagram: '',
     cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
   })
   const [errors, setErrors]         = useState({})
   const [entrega, setEntrega]       = useState(null)
+  const [dataRetirada, setDataRetirada] = useState(null)
   const [cepLoading, setCepLoading] = useState(false)
   const [cepError, setCepError]     = useState('')
   const [poloCep, setPoloCep]       = useState(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const polo = entrega === 'retirada_franca' ? 'franca' : entrega === 'retirada_cassia' ? 'cassia' : null
 
   const frete = entrega === 'entrega'
     ? (poloCep === 'franca' ? POLOS.franca.frete : poloCep === 'cassia' ? POLOS.cassia.frete : 0)
@@ -75,7 +91,12 @@ export default function Checkout({ onBack, onConcluir }) {
     if (val.replace(/\D/g, '').length === 8) buscarCep(val)
   }
 
-  // Validação por etapa
+  const handleEntregaChange = (id) => {
+    setEntrega(id)
+    setDataRetirada(null) // reset data ao trocar tipo
+    setErrors(e => ({ ...e, entrega: undefined, dataRetirada: undefined }))
+  }
+
   const validateStep = (s) => {
     const e = {}
     if (s === 1) {
@@ -84,6 +105,7 @@ export default function Checkout({ onBack, onConcluir }) {
     }
     if (s === 2) {
       if (!entrega) e.entrega = 'Selecione uma opção'
+      if (polo && !dataRetirada) e.dataRetirada = 'Selecione a data de retirada'
       if (entrega === 'entrega') {
         if (!form.cep.trim())        e.cep = 'Informe o CEP'
         if (!form.logradouro.trim()) e.logradouro = 'Informe o logradouro'
@@ -104,12 +126,17 @@ export default function Checkout({ onBack, onConcluir }) {
   const handleSubmit = async () => {
     setSubmitting(true)
     try {
+      const dataSelecionada = polo
+        ? DATAS_RETIRADA[polo].find(d => d.id === dataRetirada)
+        : null
+
       const enderecoEntrega = entrega === 'entrega'
         ? `${form.logradouro}, ${form.numero}${form.complemento ? ', ' + form.complemento : ''} — ${form.bairro}, ${form.cidade}-${form.uf}, CEP ${form.cep}`
         : entrega === 'retirada_franca'
-          ? `Retirada — ${POLOS.franca.endereco}`
-          : `Retirada — ${POLOS.cassia.endereco}`
-      const id = await addOrder({ ...form, entrega, enderecoEntrega, frete })
+          ? `Retirada — ${POLOS.franca.endereco}${dataSelecionada ? ` · ${dataSelecionada.label}` : ''}`
+          : `Retirada — ${POLOS.cassia.endereco}${dataSelecionada ? ` · ${dataSelecionada.label}` : ''}`
+
+      const id = await addOrder({ ...form, entrega, enderecoEntrega, frete, dataRetirada: dataSelecionada?.label || null })
       onConcluir({ id, total: totalFinal, frete, entrega })
     } catch (err) {
       alert('Erro ao registrar pedido. Tente novamente.')
@@ -129,7 +156,6 @@ export default function Checkout({ onBack, onConcluir }) {
     },
   ]
 
-  // Formata sabores para exibição no resumo
   const formatarSabores = (item) => {
     if (!item.flavorChoices || !item.flavors) return null
     return Object.entries(item.flavorChoices)
@@ -139,10 +165,13 @@ export default function Checkout({ onBack, onConcluir }) {
       }).filter(Boolean).join(', ')
   }
 
+  const dataSelecionadaLabel = polo && dataRetirada
+    ? DATAS_RETIRADA[polo].find(d => d.id === dataRetirada)?.label
+    : null
+
   return (
     <div className={styles.page}>
 
-      {/* Back */}
       <button className={styles.backBtn} onClick={onBack}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
           <path d="M9 2L4 7l5 5"/>
@@ -169,11 +198,9 @@ export default function Checkout({ onBack, onConcluir }) {
       </div>
 
       <div className={styles.layout}>
-
-        {/* ── Coluna do formulário ── */}
         <div className={styles.formCol}>
 
-          {/* ETAPA 1 — Dados pessoais */}
+          {/* ── ETAPA 1 — Dados ── */}
           {step === 1 && (
             <div className={styles.card}>
               <div className={styles.cardHeader}>
@@ -187,7 +214,7 @@ export default function Checkout({ onBack, onConcluir }) {
               <div className={styles.field}>
                 <label className={styles.label}>Nome completo *</label>
                 <input className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
-                  value={form.name} onChange={set('name')} placeholder="Marcia Melo" autoFocus />
+                  value={form.name} onChange={set('name')} placeholder="Márcia Melo" autoFocus />
                 {errors.name && <span className={styles.error}>{errors.name}</span>}
               </div>
 
@@ -217,7 +244,7 @@ export default function Checkout({ onBack, onConcluir }) {
             </div>
           )}
 
-          {/* ETAPA 2 — Entrega */}
+          {/* ── ETAPA 2 — Entrega ── */}
           {step === 2 && (
             <div className={styles.card}>
               <div className={styles.cardHeader}>
@@ -234,7 +261,7 @@ export default function Checkout({ onBack, onConcluir }) {
                 {opcoesEntrega.map((op) => (
                   <button key={op.id} type="button"
                     className={`${styles.entregaOpcao} ${entrega === op.id ? styles.entregaAtiva : ''}`}
-                    onClick={() => { setEntrega(op.id); setErrors(e => ({ ...e, entrega: undefined })) }}>
+                    onClick={() => handleEntregaChange(op.id)}>
                     <span className={styles.entregaEmoji}>{op.icon}</span>
                     <div className={styles.entregaInfo}>
                       <span className={styles.entregaLabel}>{op.label}</span>
@@ -250,7 +277,41 @@ export default function Checkout({ onBack, onConcluir }) {
                 ))}
               </div>
 
-              {/* Endereço — só se entrega */}
+              {/* ── Datas de retirada ── */}
+              {polo && (
+                <div className={styles.datasBlock}>
+                  <div className={styles.datasTitle}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <rect x="1" y="2" width="12" height="11" rx="2"/>
+                      <path d="M1 6h12M4 1v2M10 1v2"/>
+                    </svg>
+                    Escolha a data de retirada
+                  </div>
+                  {errors.dataRetirada && <div className={styles.errorBlock}>{errors.dataRetirada}</div>}
+                  <div className={styles.datasGrid}>
+                    {DATAS_RETIRADA[polo].map((data) => (
+                      <button key={data.id} type="button"
+                        className={`${styles.dataOpcao} ${dataRetirada === data.id ? styles.dataAtiva : ''}`}
+                        onClick={() => {
+                          setDataRetirada(data.id)
+                          setErrors(e => ({ ...e, dataRetirada: undefined }))
+                        }}>
+                        <span className={styles.dataLabel}>{data.label}</span>
+                        <span className={styles.dataSublabel}>{data.sublabel}</span>
+                        {dataRetirada === data.id && (
+                          <div className={styles.dataCheck}>
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="2">
+                              <path d="M1.5 5l2.5 2.5 4.5-4.5"/>
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Endereço de entrega ── */}
               {entrega === 'entrega' && (
                 <div className={styles.addressBlock}>
                   <div className={styles.addressTitle}>Endereço de entrega</div>
@@ -317,7 +378,7 @@ export default function Checkout({ onBack, onConcluir }) {
             </div>
           )}
 
-          {/* ETAPA 3 — Revisão */}
+          {/* ── ETAPA 3 — Revisão ── */}
           {step === 3 && (
             <div className={styles.card}>
               <div className={styles.cardHeader}>
@@ -328,7 +389,6 @@ export default function Checkout({ onBack, onConcluir }) {
                 </div>
               </div>
 
-              {/* Bloco dados */}
               <div className={styles.reviewBlock}>
                 <div className={styles.reviewBlockHeader}>
                   <span className={styles.reviewBlockTitle}>Seus dados</span>
@@ -339,7 +399,6 @@ export default function Checkout({ onBack, onConcluir }) {
                 {form.instagram && <div className={styles.reviewRow}><span>Instagram</span><strong>@{form.instagram}</strong></div>}
               </div>
 
-              {/* Bloco entrega */}
               <div className={styles.reviewBlock}>
                 <div className={styles.reviewBlockHeader}>
                   <span className={styles.reviewBlockTitle}>Entrega</span>
@@ -353,19 +412,24 @@ export default function Checkout({ onBack, onConcluir }) {
                      : `Entrega — ${form.cidade}-${form.uf}`}
                   </strong>
                 </div>
+                {dataSelecionadaLabel && (
+                  <div className={styles.reviewRow}>
+                    <span>Data de retirada</span>
+                    <strong>{dataSelecionadaLabel}</strong>
+                  </div>
+                )}
                 {frete > 0 && (
                   <div className={styles.reviewRow}><span>Frete</span><strong>R$ {frete.toFixed(2).replace('.', ',')}</strong></div>
                 )}
               </div>
 
-              {/* Bloco itens */}
               <div className={styles.reviewBlock}>
                 <div className={styles.reviewBlockHeader}>
                   <span className={styles.reviewBlockTitle}>Itens ({cart.length})</span>
                 </div>
                 {cart.map((item, idx) => {
                   const sabores = formatarSabores(item)
-                  const thumb = item.images?.[0] || item.image_url
+                  const thumb   = item.images?.[0] || item.image_url
                   return (
                     <div key={item.cartItemId || idx} className={styles.reviewItem}>
                       {thumb

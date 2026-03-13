@@ -142,6 +142,15 @@ export default function Pedidos() {
                 {o.entrega === 'entrega' && o.endereco && (
                   <div className={styles.entregaEnd}>{o.endereco}</div>
                 )}
+                {o.pickupDate && (
+                  <div className={styles.pickupDate}>
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.6">
+                      <rect x="0.5" y="1.5" width="10" height="9" rx="1.5"/>
+                      <path d="M0.5 5h10M3.5 0.5v2M7.5 0.5v2"/>
+                    </svg>
+                    {o.pickupDate}
+                  </div>
+                )}
                 {o.frete > 0 && (
                   <div className={styles.frete}>Frete: R$ {o.frete.toFixed(2).replace('.', ',')}</div>
                 )}
