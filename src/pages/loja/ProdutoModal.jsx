@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
 import { StarRating } from './Cardapio'
-import { fetchFlavorStocks } from '../../lib/stock'
 import styles from './ProdutoModal.module.css'
 
 // ── Lightbox ──────────────────────────────────────────────────────────
@@ -141,8 +140,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
   const [flavorChoices, setFlavorChoices] = useState({})
   const [choosingNew, setChoosingNew]     = useState(true)
   const [lightboxIdx, setLightboxIdx]     = useState(null)
-  const [flavorStocks, setFlavorStocks]   = useState({}) // { flavorId: { available, stock, name } }
-  const [loadingStock, setLoadingStock]   = useState(false)
   const [stockError, setStockError]       = useState('')
 
   const images      = produto.images?.length ? produto.images : produto.image_url ? [produto.image_url] : []
@@ -150,17 +147,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
   const slotsTotal     = produto.flavor_slots || 0
   const slotsRestantes = slotsTotal - totalEscolhido
   const saboresOk      = !produto.has_flavors || totalEscolhido === slotsTotal
-
-  // Carrega estoque dos sabores ao abrir o modal
-  useEffect(() => {
-    if (produto.has_flavors && produto.track_stock && !produto.made_to_order) {
-      setLoadingStock(true)
-      fetchFlavorStocks(produto.id)
-        .then(data => setFlavorStocks(data))
-        .catch(err => console.error('Erro ao carregar estoque:', err))
-        .finally(() => setLoadingStock(false))
-    }
-  }, [produto.id, produto.has_flavors, produto.track_stock, produto.made_to_order])
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape' && lightboxIdx === null) onClose() }
@@ -175,13 +161,6 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
       const next    = current + delta
       if (next < 0) return prev
       if (delta > 0 && slotsRestantes <= 0) return prev
-
-      // Verifica estoque do sabor se houver controle
-      if (delta > 0 && produto.track_stock && !produto.made_to_order) {
-        const fs = flavorStocks[id]
-        if (fs && fs.available <= current) return prev // sem estoque
-      }
-
       const updated = { ...prev, [id]: next }
       if (updated[id] === 0) delete updated[id]
       return updated
@@ -195,35 +174,9 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
       await onAdd(flavorChoices)
       setFlavorChoices({})
       setChoosingNew(false)
-      // Atualiza estoque local para refletir a reserva
-      if (produto.track_stock && !produto.made_to_order) {
-        setFlavorStocks(prev => {
-          const updated = { ...prev }
-          Object.entries(flavorChoices).forEach(([fId, qty]) => {
-            if (updated[fId]) {
-              updated[fId] = { ...updated[fId], available: Math.max(0, updated[fId].available - qty) }
-            }
-          })
-          return updated
-        })
-      }
     } catch (e) {
       setStockError(e.message || 'Estoque insuficiente. Tente novamente.')
     }
-  }
-
-  // Verifica se um sabor está disponível
-  const isFlavorAvailable = (flavorId) => {
-    if (!produto.track_stock || produto.made_to_order) return true
-    const fs = flavorStocks[flavorId]
-    if (!fs) return true // sem registro = sem controle
-    const jaEscolhido = flavorChoices[flavorId] || 0
-    return fs.available > jaEscolhido
-  }
-
-  const getFlavorStock = (flavorId) => {
-    if (!produto.track_stock || produto.made_to_order) return null
-    return flavorStocks[flavorId]?.available ?? null
   }
 
   return (
@@ -323,31 +276,12 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
                       style={{ width: `${slotsTotal ? (totalEscolhido / slotsTotal) * 100 : 0}%` }} />
                   </div>
 
-                  {loadingStock && (
-                    <p className={styles.stockLoading}>Verificando disponibilidade...</p>
-                  )}
-
                   <div className={styles.flavorsList}>
                     {(produto.flavors || []).map((f) => {
-                      const chosen    = flavorChoices[f.id] || 0
-                      const available = isFlavorAvailable(f.id)
-                      const stockQty  = getFlavorStock(f.id)
-                      const esgotado  = !available && chosen === 0
-
+                      const chosen = flavorChoices[f.id] || 0
                       return (
-                        <div key={f.id}
-                          className={`${styles.flavorRow} ${esgotado ? styles.flavorRowEsgotado : ''}`}>
-                          <div className={styles.flavorNameWrap}>
-                            <span className={styles.flavorName}>{f.name}</span>
-                            {esgotado && (
-                              <span className={styles.flavorEsgotadoTag}>Esgotado</span>
-                            )}
-                            {!esgotado && stockQty !== null && stockQty <= 5 && (
-                              <span className={styles.flavorStockWarn}>
-                                {stockQty === 1 ? 'Última unidade' : `${stockQty} restantes`}
-                              </span>
-                            )}
-                          </div>
+                        <div key={f.id} className={styles.flavorRow}>
+                          <span className={styles.flavorName}>{f.name}</span>
                           <div className={styles.flavorQty}>
                             <button className={styles.flavorQtyBtn}
                               onClick={() => setFlavor(f.id, -1)}
@@ -357,7 +291,7 @@ export default function ProdutoModal({ produto, qty, onAdd, onRemove, onClose, o
                             </span>
                             <button className={styles.flavorQtyBtn}
                               onClick={() => setFlavor(f.id, 1)}
-                              disabled={slotsRestantes === 0 || esgotado || !available}>+</button>
+                              disabled={slotsRestantes === 0}>+</button>
                           </div>
                         </div>
                       )

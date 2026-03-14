@@ -12,86 +12,26 @@ export function getSessionId() {
   return id
 }
 
-// Busca estoque disponível de um produto simples
+// Busca estoque disponível de um produto (total - reservado)
 export async function fetchAvailableStock(productId) {
   const { data, error } = await supabase
     .rpc('available_stock', { p_product_id: productId })
   if (error) throw error
-  return data // null = sem controle, número = disponível
-}
-
-// Busca estoque disponível de todos os sabores de um produto
-export async function fetchFlavorStocks(productId) {
-  // Limpa reservas expiradas antes de ler
-  await supabase.from('stock_reservations').delete().lt('expires_at', new Date().toISOString())
-
-  const { data: flavorStocks, error } = await supabase
-    .from('flavor_stock')
-    .select('flavor_id, flavor_name, stock')
-    .eq('product_id', productId)
-  if (error) throw error
-  if (!flavorStocks?.length) return {}
-
-  // Busca reservas ativas para esses sabores
-  const { data: reservations } = await supabase
-    .from('stock_reservations')
-    .select('flavor_id, qty')
-    .eq('product_id', productId)
-    .not('flavor_id', 'is', null)
-    .gt('expires_at', new Date().toISOString())
-
-  // Calcula disponível por sabor
-  const reserved = {}
-  reservations?.forEach(r => {
-    reserved[r.flavor_id] = (reserved[r.flavor_id] || 0) + r.qty
-  })
-
-  const result = {}
-  flavorStocks.forEach(f => {
-    result[f.flavor_id] = {
-      name:      f.flavor_name,
-      stock:     f.stock,
-      available: Math.max(0, f.stock - (reserved[f.flavor_id] || 0)),
-    }
-  })
-  return result
+  return data // null = sem controle
 }
 
 // Reserva estoque ao adicionar no carrinho
-// items: [{ productId, flavorId?, qty }]
+// items: [{ productId, qty }]
 export async function reserveStock(items) {
   const sessionId = getSessionId()
   const expiresAt = new Date(Date.now() + RESERVATION_MINUTES * 60 * 1000).toISOString()
 
   // Verifica disponibilidade antes de reservar
   for (const item of items) {
-    if (item.flavorId) {
-      const { data: rows } = await supabase
-        .from('stock_reservations')
-        .select('qty')
-        .eq('product_id', item.productId)
-        .eq('flavor_id', item.flavorId)
-        .gt('expires_at', new Date().toISOString())
-
-      const { data: fs } = await supabase
-        .from('flavor_stock')
-        .select('stock')
-        .eq('product_id', item.productId)
-        .eq('flavor_id', item.flavorId)
-        .maybeSingle()
-
-      if (fs) {
-        const totalReserved = rows?.reduce((s, r) => s + r.qty, 0) || 0
-        if (fs.stock - totalReserved < item.qty) {
-          return { ok: false, reason: `Estoque insuficiente para o sabor selecionado` }
-        }
-      }
-    } else {
-      const { data: available } = await supabase
-        .rpc('available_stock', { p_product_id: item.productId })
-      if (available !== null && available < item.qty) {
-        return { ok: false, reason: `Estoque insuficiente` }
-      }
+    const { data: available } = await supabase
+      .rpc('available_stock', { p_product_id: item.productId })
+    if (available !== null && available < item.qty) {
+      return { ok: false, reason: 'Estoque insuficiente' }
     }
   }
 
@@ -99,7 +39,7 @@ export async function reserveStock(items) {
   const inserts = items.map(item => ({
     session_id: sessionId,
     product_id: item.productId,
-    flavor_id:  item.flavorId || null,
+    flavor_id:  null,
     qty:        item.qty,
     expires_at: expiresAt,
   }))
@@ -109,25 +49,17 @@ export async function reserveStock(items) {
   return { ok: true }
 }
 
-// Remove reserva ao tirar do carrinho
-export async function releaseReservation(productId, flavorId = null) {
+// Remove uma reserva ao tirar do carrinho
+export async function releaseReservation(productId) {
   const sessionId = getSessionId()
-  let query = supabase
-    .from('stock_reservations')
-    .delete()
-    .eq('session_id', sessionId)
-    .eq('product_id', productId)
 
-  if (flavorId) query = query.eq('flavor_id', flavorId)
-  else          query = query.is('flavor_id', null)
-
-  // Deleta apenas 1 registro (a reserva mais antiga)
+  // Pega a reserva mais antiga desse produto nessa sessão e deleta
   const { data } = await supabase
     .from('stock_reservations')
     .select('id')
     .eq('session_id', sessionId)
     .eq('product_id', productId)
-    .is('flavor_id', flavorId || null)
+    .is('flavor_id', null)
     .order('created_at', { ascending: true })
     .limit(1)
 
@@ -136,28 +68,16 @@ export async function releaseReservation(productId, flavorId = null) {
   }
 }
 
-// Confirma reservas (converte em venda real ao criar pedido)
-// Desconta do estoque e deleta as reservas da session
+// Confirma reservas ao finalizar pedido:
+// desconta o estoque real e limpa todas as reservas da sessão
 export async function confirmReservations(sessionId, cart) {
-  // Desconta estoque dos produtos simples
-  const simpleItems = cart.filter(i => !i.has_flavors && i.track_stock)
-  for (const item of simpleItems) {
+  // Desconta estoque de cada produto que tem controle
+  const trackedItems = cart.filter(i => i.track_stock && !i.made_to_order)
+  for (const item of trackedItems) {
     await supabase.rpc('decrement_stock', {
       p_product_id: item.id,
       p_qty:        item.qty,
     })
-  }
-
-  // Desconta estoque dos sabores
-  const flavorItems = cart.filter(i => i.has_flavors && i.flavorChoices)
-  for (const item of flavorItems) {
-    for (const [flavorId, qty] of Object.entries(item.flavorChoices)) {
-      await supabase.rpc('decrement_flavor_stock', {
-        p_product_id: item.id,
-        p_flavor_id:  flavorId,
-        p_qty:        qty * item.qty,
-      })
-    }
   }
 
   // Limpa todas as reservas da sessão

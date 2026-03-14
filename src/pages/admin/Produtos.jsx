@@ -14,7 +14,7 @@ const EMPTY = {
   stock:          '',
   made_to_order:  false,
   order_deadline: '',
-  flavor_stocks:  {}, // { flavorId: qty } — só no frontend
+
 }
 
 const CATEGORIAS = ['Brigadeiros', 'Trufas', 'Especiais', 'Boxes']
@@ -43,18 +43,6 @@ export default function Produtos() {
     setEditing(p)
     const imgs = p.images?.length ? p.images : (p.image_url ? [p.image_url] : [])
 
-    // Carrega estoques por sabor do Supabase
-    let flavorStocks = {}
-    if (p.has_flavors && p.track_stock) {
-      const { data } = await supabase
-        .from('flavor_stock')
-        .select('flavor_id, stock')
-        .eq('product_id', p.id)
-      if (data) {
-        data.forEach(fs => { flavorStocks[fs.flavor_id] = fs.stock })
-      }
-    }
-
     setForm({
       name:           p.name          || '',
       price:          p.price         || '',
@@ -71,7 +59,6 @@ export default function Produtos() {
       stock:          p.stock         ?? '',
       made_to_order:  p.made_to_order || false,
       order_deadline: p.order_deadline || '',
-      flavor_stocks:  flavorStocks,
     })
     setErrors({})
     setShowModal(true)
@@ -153,7 +140,7 @@ export default function Produtos() {
         made_to_order:  form.made_to_order,
         order_deadline: form.made_to_order ? form.order_deadline.trim() : null,
         track_stock:    form.made_to_order ? false : form.track_stock,
-        stock:          !form.made_to_order && form.track_stock && !form.has_flavors
+        stock:          !form.made_to_order && form.track_stock
                           ? (form.stock === '' ? null : parseInt(form.stock))
                           : null,
       }
@@ -164,20 +151,6 @@ export default function Produtos() {
       } else {
         const data = await addProduct(payload)
         savedId = data?.id
-      }
-
-      // Salva estoque por sabor
-      if (!form.made_to_order && form.track_stock && form.has_flavors && savedId) {
-        for (const flavor of form.flavors) {
-          const qty = form.flavor_stocks[flavor.id]
-          if (qty === undefined || qty === '') continue
-          await supabase.from('flavor_stock').upsert({
-            product_id:  savedId,
-            flavor_id:   flavor.id,
-            flavor_name: flavor.name,
-            stock:       parseInt(qty) || 0,
-          }, { onConflict: 'product_id,flavor_id' })
-        }
       }
 
       setShowModal(false)
@@ -472,8 +445,7 @@ export default function Produtos() {
                       <span className={styles.toggleLabel}>Controlar estoque</span>
                     </label>
 
-                    {/* Estoque de produto simples (sem sabores) */}
-                    {form.track_stock && !form.has_flavors && (
+                    {form.track_stock && (
                       <div className={styles.field} style={{ marginTop: 12, maxWidth: 200 }}>
                         <label className={styles.label}>Unidades em estoque</label>
                         <input className={styles.input} type="number" min="0"
@@ -482,35 +454,7 @@ export default function Produtos() {
                       </div>
                     )}
 
-                    {/* Estoque por sabor */}
-                    {form.track_stock && form.has_flavors && (
-                      <div className={styles.field} style={{ marginTop: 12 }}>
-                        <label className={styles.label}>Estoque por sabor</label>
-                        <span className={styles.hint} style={{ display: 'block', marginBottom: 10 }}>
-                          O kit fica disponível enquanto qualquer sabor tiver estoque.
-                          Se um sabor acabar, ele some das opções.
-                        </span>
-                        {form.flavors.length === 0 && (
-                          <span className={styles.hint} style={{ color: '#b08060' }}>
-                            Adicione os sabores acima para definir o estoque de cada um.
-                          </span>
-                        )}
-                        {form.flavors.map(f => (
-                          <div key={f.id} className={styles.fieldRow} style={{ marginTop: 8, alignItems: 'center' }}>
-                            <span style={{ flex: 1, fontSize: 13, color: 'var(--ink)' }}>{f.name}</span>
-                            <div className={styles.field} style={{ flex: 0, minWidth: 110 }}>
-                              <input className={styles.input} type="number" min="0"
-                                value={form.flavor_stocks[f.id] ?? ''}
-                                onChange={(e) => setForm(prev => ({
-                                  ...prev,
-                                  flavor_stocks: { ...prev.flavor_stocks, [f.id]: e.target.value }
-                                }))}
-                                placeholder="0 un." />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+
                   </div>
                 )}
               </div>

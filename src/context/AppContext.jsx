@@ -89,24 +89,11 @@ export function AppProvider({ children }) {
     })),
   })
 
-  // ── Carrinho com reserva de estoque ──────────
+  // ── Carrinho com reserva de estoque por produto ──
   const addToCart = async (product, flavorChoices = null) => {
-    // Monta itens para reservar
-    const itemsToReserve = []
-
-    if (product.has_flavors && flavorChoices && product.track_stock) {
-      // Reserva por sabor
-      for (const [flavorId, qty] of Object.entries(flavorChoices)) {
-        if (qty > 0) itemsToReserve.push({ productId: product.id, flavorId, qty })
-      }
-    } else if (product.track_stock && !product.made_to_order) {
-      // Reserva produto simples
-      itemsToReserve.push({ productId: product.id, qty: 1 })
-    }
-
-    // Tenta reservar se há controle de estoque
-    if (itemsToReserve.length > 0) {
-      const result = await reserveStock(itemsToReserve)
+    // Reserva se há controle de estoque
+    if (product.track_stock && !product.made_to_order) {
+      const result = await reserveStock([{ productId: product.id, qty: 1 }])
       if (!result.ok) {
         throw new Error(result.reason || 'Estoque insuficiente')
       }
@@ -135,13 +122,7 @@ export function AppProvider({ children }) {
 
       // Libera reserva em background
       if (item && item.track_stock && !item.made_to_order) {
-        if (item.has_flavors && item.flavorChoices) {
-          Object.entries(item.flavorChoices).forEach(([flavorId, qty]) => {
-            if (qty > 0) releaseReservation(item.id, flavorId)
-          })
-        } else {
-          releaseReservation(item.id, null)
-        }
+        releaseReservation(item.id)
       }
 
       if (byCartId) {
@@ -161,8 +142,8 @@ export function AppProvider({ children }) {
 
   // ── Pedidos ───────────────────────────────────
   const addOrder = async (customerData, paymentMethod) => {
-    const shipping   = customerData.frete || 0
-    const sessionId  = getSessionId()
+    const shipping  = customerData.frete || 0
+    const sessionId = getSessionId()
     try {
       const order = await createOrderDB({
         customerData, cart,
