@@ -30,8 +30,9 @@ export default function Dashboard() {
     return d instanceof Date && !isNaN(d) && d.getMonth() === mes && d.getFullYear() === ano
   }), [orders, mes, ano])
 
-  const receita   = pedidosFiltrados
-    .filter(o => o.status === 'entregue' || o.status === 'concluido')
+  const PAGAMENTO_CONFIRMADO = ['pagamento_aprovado', 'em_preparo', 'pronto', 'entregue', 'concluido']
+  const receita = pedidosFiltrados
+    .filter(o => PAGAMENTO_CONFIRMADO.includes(o.status))
     .reduce((s, o) => s + (o.total || 0), 0)
 
   const pendentes  = pedidosFiltrados.filter(o => o.status === 'aguardando_pagamento').length
@@ -54,7 +55,7 @@ export default function Dashboard() {
   const receitaPorDia = useMemo(() => {
     const dias = Array(diasNoMes).fill(0)
     pedidosFiltrados
-      .filter(o => o.status === 'entregue' || o.status === 'concluido')
+      .filter(o => ['pagamento_aprovado', 'em_preparo', 'pronto', 'entregue', 'concluido'].includes(o.status))
       .forEach(o => {
         const d = new Date(o.created_at || o.date).getDate()
         if (d >= 1 && d <= diasNoMes) dias[d - 1] += (o.total || 0)

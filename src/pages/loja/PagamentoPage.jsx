@@ -124,6 +124,7 @@ export default function PagamentoPage({ pedido, onNovoPedido }) {
                 </div>
                 <div className={styles.metodoNome}>Cartão de crédito</div>
                 <div className={styles.metodoDesc}>Link seguro enviado pelo WhatsApp</div>
+                <div className={styles.metodoTaxa}>* Sujeito a taxas da operadora</div>
                 <div className={styles.metodoArrow}>→</div>
               </button>
 

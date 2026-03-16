@@ -149,6 +149,13 @@
   font-weight: 300;
   line-height: 1.5;
 }
+.metodoTaxa {
+  font-size: 11px;
+  color: #b08060;
+  font-weight: 500;
+  font-style: italic;
+  margin-top: 4px;
+}
 .metodoArrow {
   font-size: 18px;
   color: var(--brown-light);

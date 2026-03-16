@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 import { fetchProducts, createProduct, updateProduct as updateProductDB, deleteProduct as deleteProductDB } from '../lib/products'
 import { fetchOrders, createOrder as createOrderDB, updateOrderStatus as updateOrderStatusDB } from '../lib/orders'
 import { fetchCustomers } from '../lib/customers'
@@ -165,6 +166,23 @@ export function AppProvider({ children }) {
   const updateOrderStatus = async (id, status) => {
     try {
       await updateOrderStatusDB(id, status)
+
+      // Devolve estoque ao cancelar
+      if (status === 'cancelado') {
+        const order = orders.find(o => o.id === id)
+        if (order) {
+          for (const item of order.items) {
+            const produto = products.find(p => p.name === item.name)
+            if (produto?.track_stock && !produto?.made_to_order) {
+              await supabase.rpc('increment_stock', {
+                p_product_id: produto.id,
+                p_qty:        item.qty,
+              })
+            }
+          }
+        }
+      }
+
       setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o))
     } catch (err) {
       console.error('Erro ao atualizar status:', err)
@@ -207,7 +225,7 @@ export function AppProvider({ children }) {
   // ── Stats ─────────────────────────────────────
   const stats = {
     totalOrders:    orders.length,
-    totalRevenue:   orders.filter((o) => o.status === 'entregue').reduce((s, o) => s + o.total, 0),
+    totalRevenue:   orders.filter((o) => ['pagamento_aprovado','em_preparo','pronto','entregue','concluido'].includes(o.status)).reduce((s, o) => s + o.total, 0),
     pending:        orders.filter((o) => o.status === 'aguardando_pagamento').length,
     preparing:      orders.filter((o) => o.status === 'em_preparo').length,
     totalCustomers: customers.length,
