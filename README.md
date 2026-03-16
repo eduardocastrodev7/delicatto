@@ -2,7 +2,7 @@
 
 PWA de pedidos online para a **Delicatto Doceria** - confeitaria artesanal especializada em brigadeiros, trufas e boxes especiais.
 
-🔗 **[delicatto-eta.vercel.app](https://delicatto-eta.vercel.app)**
+[🔗 **[delicatto-eta.vercel.app](https://delicatto-eta.vercel.app)**](https://www.delicattodoceria.com.br/)
 
 ---
 
