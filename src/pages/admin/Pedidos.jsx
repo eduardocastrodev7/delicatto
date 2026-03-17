@@ -77,7 +77,7 @@ export default function Pedidos() {
         <select className={styles.filterSelect} value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
           <option value="todos">Todos os status</option>
           <option value="aguardando_pagamento">Aguardando pagamento</option>
-          <option value="pago">Pago</option>
+          <option value="pagamento_aprovado">Pagamento aprovado</option>
           <option value="em_preparo">Em preparo</option>
           <option value="pronto">Pronto</option>
           <option value="entregue">Entregue</option>
