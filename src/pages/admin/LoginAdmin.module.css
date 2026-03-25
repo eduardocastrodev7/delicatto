@@ -1,0 +1,117 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--beige-light);
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--beige-mid);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  animation: fadeUp 0.35s var(--ease);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  opacity: 0.8;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--brown-dark);
+  text-align: center;
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 300;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--beige-light);
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+  font-family: var(--font-body);
+}
+
+.input::placeholder { color: var(--muted); opacity: 0.6; }
+.input:focus { border-color: var(--brown-light); background: var(--white); }
+
+.error {
+  background: #8c303012;
+  border: 1px solid #8c303030;
+  color: var(--danger);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.btn {
+  width: 100%;
+  background: var(--brown-dark);
+  color: var(--cream);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  transition: background 0.2s;
+  font-family: var(--font-body);
+}
+
+
+.btn:hover:not(:disabled) { background: var(--brown); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }

@@ -1,0 +1,218 @@
+/* ─── Fonte customizada ─────────────────────── */
+@font-face {
+  font-family: 'Made Sunflower';
+  src: url('/fonts/MadeSunflower.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Cores da marca */
+  --beige:        #c8b9a8;
+  --beige-light:  #eee8e0;
+  --beige-mid:    #ddd4c8;
+  --beige-dark:   #ccc0b0;
+
+  --brown-dark:   #3d2010;
+  --brown:        #5c3218;
+  --brown-light:  #8c5c38;
+  --brown-muted:  #a07858;
+
+  --cream:        #faf7f4;
+  --white:        #ffffff;
+  --ink:          #1e1008;
+  --muted:        #7a6858;
+
+  --success:      #4a7c59;
+  --danger:       #8c3030;
+  --warning:      #b07830;
+  --purple:       #6b5080;
+
+  /* Fontes */
+  --font-display: 'Made Sunflower', Georgia, serif;
+  --font-body:    'Poppins', system-ui, sans-serif;
+
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+
+  --shadow-sm:  0 1px 4px rgba(30,16,8,0.07);
+  --shadow-md:  0 4px 20px rgba(30,16,8,0.09);
+  --shadow-lg:  0 16px 48px rgba(30,16,8,0.13);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--beige-light);
+  color: var(--ink);
+  min-height: 100dvh;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: var(--font-body); cursor: pointer; }
+input, select, textarea { font-family: var(--font-body); }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--beige-dark); border-radius: 4px; }
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+/* ═══════════════════════════════════════════════
+   ANIMAÇÕES GLOBAIS — Delicatto
+═══════════════════════════════════════════════ */
+
+/* ── Entrada de página ───────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.7); }
+  70%  { transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-6px); }
+  60%      { transform: translateY(-2px); }
+}
+
+/* ── Utilitários de animação ─────────────────── */
+.anim-fade-up   { animation: fadeUp      0.38s var(--ease) both; }
+.anim-fade-in   { animation: fadeIn      0.28s ease both; }
+.anim-scale-in  { animation: scaleIn     0.28s var(--ease) both; }
+.anim-pop-in    { animation: popIn       0.32s var(--ease) both; }
+.anim-slide-right { animation: slideInRight 0.3s var(--ease) both; }
+
+/* Delays escalonados para listas */
+.anim-delay-1  { animation-delay: 0.05s; }
+.anim-delay-2  { animation-delay: 0.10s; }
+.anim-delay-3  { animation-delay: 0.15s; }
+.anim-delay-4  { animation-delay: 0.20s; }
+.anim-delay-5  { animation-delay: 0.25s; }
+
+/* ── Skeleton loader ─────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--beige-mid) 25%,
+    var(--beige-light) 50%,
+    var(--beige-mid) 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Toast notification ──────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: var(--brown-dark);
+  color: var(--cream);
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(40,20,8,0.3);
+  z-index: 9000;
+  white-space: nowrap;
+  animation: fadeUp 0.28s var(--ease) both;
+  pointer-events: none;
+}
+.toast-success { background: #2d6a4f; }
+.toast-error   { background: #8c3030; }
+
+/* ── Hover micro-interações ──────────────────── */
+.hover-lift {
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Ripple em botões ────────────────────────── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: inherit;
+}
+.btn-ripple:active::after { opacity: 1; }
+
+/* ── Modal overlay ───────────────────────────── */
+.modal-overlay-anim {
+  animation: fadeIn 0.2s ease both;
+}
+.modal-content-anim {
+  animation: scaleIn 0.25s var(--ease) both;
+}
+
+/* ── Redução de movimento (acessibilidade) ───── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

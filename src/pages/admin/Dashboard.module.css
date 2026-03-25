@@ -1,0 +1,284 @@
+/* ── Filtro ────────────────────────────────────────── */
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.select {
+  background: var(--white);
+  border: 1.5px solid var(--beige-mid);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+.select:focus { outline: none; border-color: var(--brown-light); }
+.filterLabel { font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+/* ── Stats ─────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.statCard {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.35s var(--ease) both;
+}
+.accentBar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.statNum {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--brown-dark);
+  margin: 10px 0 4px;
+}
+.statLabel { font-size: 12px; color: var(--muted); }
+
+/* ── Linha do meio ─────────────────────────────────── */
+.midRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 700px) { .midRow { grid-template-columns: 1fr; } }
+
+/* ── Card genérico ─────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.cardTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ── Gráfico de barras ─────────────────────────────── */
+.chartWrap {
+  position: relative;
+  padding-bottom: 20px;
+}
+.chartGuides {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: calc(100% - 20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.chartGuideLine {
+  width: 100%;
+  height: 1px;
+  background: var(--beige-mid);
+  opacity: 0.6;
+}
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100px;
+  position: relative;
+  z-index: 1;
+}
+.chartCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  cursor: default;
+  position: relative;
+}
+.chartCol:hover .chartBar { opacity: 0.75; }
+.chartBar {
+  width: 100%;
+  background: var(--brown-dark);
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+  transition: height 0.5s cubic-bezier(.4,0,.2,1), opacity 0.15s;
+}
+.chartAxis {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+.chartAxisCol {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.chartAxisLabel { font-size: 9px; color: var(--muted); font-weight: 500; }
+
+/* ── Ranking ───────────────────────────────────────── */
+.rankingList { display: flex; flex-direction: column; gap: 14px; }
+.rankingItem { display: flex; align-items: center; gap: 10px; }
+.rankingPos {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--beige-light);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rankingInfo { flex: 1; min-width: 0; }
+.rankingName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+.rankingTrack {
+  height: 4px;
+  background: var(--beige-mid);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.rankingFill {
+  height: 100%;
+  background: var(--brown-dark);
+  border-radius: 100px;
+  transition: width 0.5s var(--ease);
+}
+.rankingQty { font-size: 12px; font-weight: 700; color: var(--brown-dark); white-space: nowrap; }
+
+/* ── Linha inferior ────────────────────────────────── */
+.bottomRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) { .bottomRow { grid-template-columns: 1fr; } }
+
+/* Datas de retirada */
+.dataRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--beige-light);
+  font-size: 13px;
+}
+.dataRow:last-child { border-bottom: none; }
+.dataRowLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.dataRowQty { font-weight: 700; color: var(--brown-dark); }
+
+/* Cancelamentos */
+.cancelNum {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  color: #c0392b;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.cancelLabel { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.cancelTaxa  { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+
+.progressTrack {
+  height: 4px;
+  background: var(--beige-mid);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.progressFillRed {
+  height: 100%;
+  background: #c0392b;
+  border-radius: 100px;
+  transition: width 0.5s var(--ease);
+}
+
+/* Distribuição por status */
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--beige-light);
+  font-size: 12px;
+}
+.statusRow:last-child { border-bottom: none; }
+.statusDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.statusRowLabel { flex: 1; color: var(--ink); }
+.statusRowCount { font-weight: 700; color: var(--brown-dark); }
+
+/* ── Tabela ────────────────────────────────────────── */
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.tableWrap {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--beige-mid);
+  overflow: hidden;
+}
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--beige-mid);
+}
+.table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--beige-light);
+}
+.table tr:last-child td { border-bottom: none; }
+.tdId    { color: var(--muted); font-weight: 500; font-size: 12px; }
+.tdTotal { font-weight: 700; color: var(--brown-dark); }
+.tdMuted { color: var(--muted); font-size: 12px; }
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.empty { padding: 32px; text-align: center; color: var(--muted); font-size: 14px; }

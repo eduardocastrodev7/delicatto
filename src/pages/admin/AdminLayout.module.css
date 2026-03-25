@@ -1,0 +1,111 @@
+.shell {
+  min-height: 100dvh;
+  background: var(--beige-light);
+}
+
+.header {
+  background: var(--brown-dark);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logoWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoImg {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logoName {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--cream);
+  letter-spacing: 0.05em;
+}
+
+.logoPainel {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--beige-mid);
+  font-weight: 500;
+  margin-top: 3px;
+}
+
+.adminInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--brown);
+  color: var(--cream);
+  font-family: var(--font-display);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adminName {
+  font-size: 13px;
+  color: var(--beige);
+  font-weight: 400;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--beige);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.18s;
+}
+.logoutBtn:hover {
+  background: rgba(255,255,255,0.15);
+  color: var(--cream);
+}
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+@media (max-width: 480px) {
+  .headerInner { padding: 0 16px; }
+  .adminName { display: none; }
+  .main { padding: 0 16px; }
+}
